@@ -18,6 +18,7 @@ COPY package*.json ./
 RUN npm install --only=production && npm cache clean --force --loglevel=error
 COPY . .
 RUN npm run build
+RUN cd backend/ && npm install
 
 RUN chmod +x docker/entrypoint.sh
 

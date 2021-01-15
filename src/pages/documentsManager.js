@@ -1,0 +1,166 @@
+import React, { Component, Fragment } from 'react';
+import { withRouter, Link } from 'react-router-dom';
+import {
+  withStyles,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton
+} from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ShareIcon from '@material-ui/icons/Share';
+import { orderBy } from 'lodash';
+import { compose } from 'recompose';
+
+import LoadingBar from '../components/loadingBar';
+import InfoSnackbar from '../components/infoSnackbar';
+import ErrorSnackbar from '../components/errorSnackbar';
+
+const MAX_LENGTH = 100
+const styles = theme => ({
+
+});
+
+class DocumentsManager extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      loading: true,
+      documents: "",
+
+      success: null,
+      error: null,
+    };
+  }
+
+  componentDidMount() {
+    this.getDocuments();
+  }
+
+  async fetch(method, endpoint, body) {
+    try {
+      this.setState({
+        loading: true
+      })
+
+      let response = await fetch(`/api${endpoint}`, {
+        method,
+        body: body,
+      });
+
+      this.setState({
+        loading: false
+      })
+
+      response = await response.json();
+      return response.documents
+    } catch (error) {
+      console.error(error);
+
+      this.setState({ error });
+    }
+  }
+
+  async getDocuments() {
+    let documents = await this.fetch('get', '/documents')
+
+    this.setState({ 
+      loading: false, 
+      documents: documents || [] 
+    });
+  }
+
+  async deleteDocument(document) {
+    if (window.confirm(`Are you sure you want to delete "${document.name}"`)) {
+      await this.fetch('delete', `/documents/${document._id}`);
+
+      this.getDocuments();
+    }
+  }
+
+  shareDocumentLink(document) {
+    navigator.clipboard.writeText(window.location.origin + "/documents/" + document._id)
+
+    this.setState({
+      success: "Copied link to document in clipboard"
+    })
+  }
+
+  render() {
+    const { classes } = this.props;
+    
+    return (
+      <Fragment>
+        <Typography variant="h4">Documents</Typography>
+        
+        {this.state.documents.length > 0 ? (
+          // documents available
+          <Paper elevation={1} className={classes.useCase}>
+            <List>
+              {orderBy(this.state.documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
+                <ListItem key={document._id}  button component={Link} to={`/documents/${document._id}`}>
+                  <ListItemText
+                    primary={document.name}
+                  />
+
+                  <ListItemText>
+                    {document.content.length > MAX_LENGTH ? (
+                    <div>
+                        {`${document.content.substring(0, 100)}...`}
+                    </div>
+                    ) : (
+                    <div>
+                        {document.content}
+                    </div>
+                    )
+                    }
+                  </ListItemText>
+                  <ListItemSecondaryAction>
+                    <IconButton onClick={() => this.shareDocumentLink(document, navigator)} color="inherit">
+                      <ShareIcon />
+                    </IconButton>
+                    <IconButton onClick={() => this.deleteDocument(document)} color="inherit">
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        ) : (
+          // no documents available
+          !this.state.loading && (
+            <Typography variant="subtitle1">So far no documents have been created</Typography>
+          )
+        )}
+  
+        {this.state.error && (
+          <ErrorSnackbar
+            onClose={() => this.setState({ error: null })}
+            message={this.state.error.message}
+          />
+        )}
+
+        {this.state.loading && (
+          <LoadingBar/>
+        )}
+
+        {this.state.success && (
+          <InfoSnackbar
+            onClose={() => this.setState({ success: null })}
+            message={this.state.success}
+          />
+        )}
+      </Fragment>
+    );
+  }
+}
+
+export default compose(
+  withRouter,
+  withStyles(styles),
+)(DocumentsManager);

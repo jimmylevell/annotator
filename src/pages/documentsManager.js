@@ -8,11 +8,14 @@ import {
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
+  TextField,
   IconButton
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ShareIcon from '@material-ui/icons/Share';
-import { orderBy } from 'lodash';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import { orderBy, filter } from 'lodash';
 import { compose } from 'recompose';
 
 import LoadingBar from '../components/loadingBar';
@@ -21,7 +24,15 @@ import ErrorSnackbar from '../components/errorSnackbar';
 
 const MAX_LENGTH = 100
 const styles = theme => ({
-
+  documentsView: {
+    whiteSpace: "inherit",
+  },
+  linkStyle: {
+    color: 'black'
+  },
+  searchInput: {
+    width: "100%"
+  }
 });
 
 class DocumentsManager extends Component {
@@ -30,6 +41,7 @@ class DocumentsManager extends Component {
 
     this.state = {
       loading: true,
+      query: "",
       documents: "",
 
       success: null,
@@ -47,7 +59,7 @@ class DocumentsManager extends Component {
         loading: true
       })
 
-      let response = await fetch(`/api${endpoint}`, {
+      let response = await fetch(`/api${ endpoint }`, {
         method,
         body: body,
       });
@@ -75,8 +87,14 @@ class DocumentsManager extends Component {
   }
 
   async deleteDocument(document) {
-    if (window.confirm(`Are you sure you want to delete "${document.name}"`)) {
-      await this.fetch('delete', `/documents/${document._id}`);
+    if (window.confirm(`Are you sure you want to delete "${ document.name }"`)) {
+      await this.fetch('delete', `/documents/${ document._id }`);
+
+      if(!this.state.error) {
+        this.setState({
+          success: "document deleted successfully"
+        })
+      }
 
       this.getDocuments();
     }
@@ -90,36 +108,69 @@ class DocumentsManager extends Component {
     })
   }
 
+  handleSearchChange = evt => {
+    this.setState({ 
+      query: evt.target.value 
+    });
+  };
+
   render() {
     const { classes } = this.props;
+    const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL
+
+    let that = this
+    let documents = filter(this.state.documents, function(obj) {
+      return obj.name.toUpperCase().includes(that.state.query.toUpperCase());
+    })
     
     return (
       <Fragment>
+        <TextField
+          type="text"
+          key="inputQuery"
+          placeholder="Search"
+          label="Search"
+          className={classes.searchInput}
+          value={this.state.query}
+          onChange={this.handleSearchChange}
+          variant="outlined"
+          size="small"
+          autoFocus 
+        />
+
         <Typography variant="h4">Documents</Typography>
         
         {this.state.documents.length > 0 ? (
           // documents available
-          <Paper elevation={1} className={classes.useCase}>
+          <Paper elevation={1} className={ classes.documentsView }>
             <List>
-              {orderBy(this.state.documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
-                <ListItem key={document._id}  button component={Link} to={`/documents/${document._id}`}>
+              {orderBy(documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
+                <ListItem key={ document._id }  button component={ Link } to={ `/documents/${document._id}` }>
                   <ListItemText
-                    primary={document.name}
+                    primary={ document.name }
                   />
 
                   <ListItemText>
-                    {document.content.length > MAX_LENGTH ? (
+                    { document.content.length > MAX_LENGTH ? (
                     <div>
-                        {`${document.content.substring(0, 100)}...`}
+                        {`${ document.content.substring(0, MAX_LENGTH) }...` }
                     </div>
                     ) : (
                     <div>
-                        {document.content}
+                        { document.content }
                     </div>
                     )
                     }
                   </ListItemText>
                   <ListItemSecondaryAction>
+                    <IconButton>
+                      <a href={`${ REACT_APP_BACKEND_URL }/api/documents/${document._id}/download`} className={classes.linkStyle}>
+                        <SaveAltIcon />
+                      </a>
+                    </IconButton>
+                    <IconButton component={Link} to={`/documents/${document._id}/edit`} color="inherit">
+                      <EditIcon/>
+                    </IconButton>
                     <IconButton onClick={() => this.shareDocumentLink(document, navigator)} color="inherit">
                       <ShareIcon />
                     </IconButton>

@@ -56,7 +56,7 @@ class FileUploadComponent extends Component {
         loading: true,
       })
 
-      const response = await fetch(`/api${endpoint}`, {
+      const response = await fetch(`/api${ endpoint }`, {
         method,
         body: body
       });
@@ -102,7 +102,7 @@ class FileUploadComponent extends Component {
       <Fragment>
         <Typography variant="h4">Document upload</Typography>
 
-        <form onSubmit={this.onSubmit}>
+        <form onSubmit={ this.onSubmit }>
           <label htmlFor="btn-upload">
             <input
               id="btn-upload"
@@ -110,7 +110,7 @@ class FileUploadComponent extends Component {
               style={{ display: 'none' }}
               accept=".txt"
               type="file"
-              onChange={this.onFileChange} 
+              onChange={ this.onFileChange } 
             />
 
             <Button
@@ -124,13 +124,13 @@ class FileUploadComponent extends Component {
 
         <div className="file-name">
           {this.state.document && this.state.document.name.length > 0 && (
-            <Typography>{this.state.document.name}</Typography>
+            <Typography>{ this.state.document.name }</Typography>
           )}
         </div>
           
           <Button size="small" 
             color="primary" 
-            disabled={!this.state.document} 
+            disabled={ !this.state.document } 
             type="submit"
           >
             <AddIcon/>Upload
@@ -140,7 +140,7 @@ class FileUploadComponent extends Component {
         {this.state.error && (
         <ErrorSnackbar
           onClose={() => this.setState({ error: null })}
-          message={this.state.error.message}
+          message={ this.state.error.message }
         />
         )}
 
@@ -151,7 +151,7 @@ class FileUploadComponent extends Component {
         {this.state.success && (
           <InfoSnackbar
             onClose={() => this.setState({ success: null })}
-            message={this.state.success}
+            message={ this.state.success }
           />
         )}
       </Fragment>

@@ -15,8 +15,8 @@ const styles = theme => ({
 });
 
 const LoadingBar = ({ classes }) => (
-    <div className={classes.root}>
-    <CircularProgress className={classes.loadingBar} size={100}/>
+    <div className={ classes.root }>
+    <CircularProgress className={ classes.loadingBar } size={ 100 }/>
   </div>
 );
 

@@ -9,6 +9,7 @@ import AppHeader from './appHeader'
 import FilesUploadComponent from '../pages/fileUpload'
 import DocumentsManager from '../pages/documentsManager'
 import DocumentEditor from '../pages/documentEditor'
+import DocumentAnnotator from '../pages/documentAnnotator';
 
 const styles = theme => ({
   main: {
@@ -27,7 +28,8 @@ const App = ({ classes }) => (
         <Route exact path="/" component={FilesUploadComponent} />
         <Route exact path="/fileupload" component={FilesUploadComponent} />
         <Route exact path="/documents" component={DocumentsManager} />
-        <Route exact path="/documents/:id" component={DocumentEditor} />
+        <Route exact path="/documents/:id" component={DocumentAnnotator} />
+        <Route exact path="/documents/:id/edit" component={DocumentEditor} />
       </main>
     </Fragment>
   );

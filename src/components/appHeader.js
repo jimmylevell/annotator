@@ -37,8 +37,8 @@ class AppHeader extends Component {
     
     return (
     <AppBar position="static">
-      <Toolbar className={classes.toolBar}>
-        <Button color="inherit" component={Link} to="/">
+      <Toolbar className={ classes.toolBar }>
+        <Button color="inherit" component={ Link } to="/">
           <FeedbackIcon/>
           <Typography variant="h6" color="inherit">
             Annotator 
@@ -46,8 +46,8 @@ class AppHeader extends Component {
         </Button>
 
         {/* link collection */}
-        <Link className={classes.link} to="/fileupload">Upload</Link>
-        <Link className={classes.link} to="/documents">Documents</Link>
+        <Link className={ classes.link } to="/fileupload">Upload</Link>
+        <Link className={ classes.link } to="/documents">Documents</Link>
       </Toolbar>
     </AppBar>
     )

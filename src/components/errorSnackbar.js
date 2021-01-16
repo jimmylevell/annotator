@@ -29,21 +29,21 @@ const styles = theme => ({
 const ErrorSnackbar = ({ id, message, onClose, classes }) => (
   <Snackbar
     open
-    autoHideDuration={6000}
+    autoHideDuration={ 6000 }
     onClose={onClose}
   >
     <SnackbarContent
-      className={`${classes.margin} ${classes.snackbarContent}`}
-      aria-describedby={id}
+      className={`${ classes.margin } ${ classes.snackbarContent }`}
+      aria-describedby={ id }
       message={
-        <span id={id} className={classes.message}>
-          <ErrorIcon className={`${classes.icon} ${classes.iconVariant}`} />
-          {message}
+        <span id={ id } className={ classes.message }>
+          <ErrorIcon className={`${ classes.icon } ${ classes.iconVariant }`} />
+          { message }
         </span>
       }
       action={[
-        <IconButton key="close" aria-label="Close" color="inherit" onClick={onClose}>
-          <CloseIcon className={classes.icon} />
+        <IconButton key="close" aria-label="Close" color="inherit" onClick={ onClose }>
+          <CloseIcon className={ classes.icon } />
         </IconButton>
       ]}
     />

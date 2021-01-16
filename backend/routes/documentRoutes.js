@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer  = require('multer')
 const router = express.Router();
+const stream = require('stream')
 
 let Document = require('../database/models/Document');
 const storage = multer.memoryStorage();
@@ -48,6 +49,23 @@ router.get("/documents/:id", (req, res, next) => {
             message: "document retrieved successfully!",
             documents: data
         });
+    });
+});
+
+router.get("/documents/:id/download", (req, res, next) => {
+    let documentId = req.params.id
+    Document.findOne({ '_id': documentId}).then(data => {
+        // output document content as html
+        let filename = data.name + ".html"
+        var fileContents = Buffer.from(data.content, "utf8");
+
+        var readStream = new stream.PassThrough();
+        readStream.end(fileContents);
+      
+        res.set('Content-disposition', 'attachment; filename=' + filename);
+        res.set('Content-Type', 'text/plain');
+      
+        readStream.pipe(res);
     });
 });
 

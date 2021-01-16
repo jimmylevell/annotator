@@ -3,25 +3,26 @@ import { withRouter } from 'react-router-dom';
 import {
   withStyles,
   Typography,
-  TextField,
-  Button
+  Box
 } from '@material-ui/core';
 import { compose } from 'recompose';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
 
 import LoadingBar from '../components/loadingBar';
 import ErrorSnackbar from '../components/errorSnackbar';
 import InfoSnackbar from '../components/infoSnackbar';
 
 const styles = theme => ({
-  contentInput: {
-    textAlign: 'left',
-    width: "99%",
+  annotatorView: {
+    width: "90%",
+    height: "70vh",
+    overflowY: "scroll",
+    overflowX: "none",
+    whiteSpace: "pre-wrap",
     margin: theme.spacing(1)
   }
 });
 
-class DocumentEditor extends Component {
+class DocumentAnnotator extends Component {
   constructor() {
     super();
 
@@ -91,12 +92,6 @@ class DocumentEditor extends Component {
 
   async handleSaveDocument() {
     await this.fetch('put', '/documents/' + this.state.documentId, this.state.document)
-
-    if(!this.state.error) {
-      this.setState({
-        success: "document saved successfully"
-      })
-    }
   }
 
   render() {
@@ -104,25 +99,15 @@ class DocumentEditor extends Component {
 
     return (
       <Fragment>
-        <Typography className={ classes.title } variant="h4">Document Editor</Typography>
+        <Typography className={ classes.title } variant="h4">Document Annotator </Typography>
         
         {this.state.document !== null ? (
           // document present
           <div>
             <Typography variant="h5"> { this.state.document.name } </Typography>
-
-            <Button size="small" color="primary" onClick={ this.handleSaveDocument }><SaveAltIcon/>Save</Button>
-            <TextField
-              type="text"
-              label="Document content"
-              value={ this.state.document.content }
-              onChange={ this.handleChange }
-              variant="outlined"
-              fullWidth={ true }
-              className={ classes.contentInput }
-              multiline
-              rows={ 20 }
-            />
+            <Box border={1} className={ classes.annotatorView }>
+              <Typography> { this.state.document.content }</Typography>
+            </Box>
           </div>        
         ) : (
           // no document could be found
@@ -156,4 +141,4 @@ class DocumentEditor extends Component {
 export default compose(
   withRouter,
   withStyles(styles),
-)(DocumentEditor);
+)(DocumentAnnotator);

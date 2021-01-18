@@ -3,10 +3,37 @@ const mongoose = require('mongoose');
 const multer  = require('multer')
 const router = express.Router();
 const stream = require('stream')
+const fs = require('fs')
+const neatCsv = require('neat-csv');
+
 
 let Document = require('../database/models/Document');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+function addAnnotations(document, language) {
+    let annoationFile = null
+
+    if(language === "English") {
+        annoationFile = "public/annotations_en.csv"
+    } else if(language === "Czech") {
+        annoationFile = "public/annotations_cz.csv"
+    } else {
+        annoationFile = "public/annotations_en.csv"
+    }
+
+    fs.readFile(annoationFile, 'utf8' , async (err, data) => {
+        if (err) {
+            console.error(err)
+            return
+        }
+    
+        let annotations = await neatCsv(data)
+        annotations.forEach(annotation => {
+            
+        }
+    })
+}
 
 // post method 
 router.post('/documents', upload.single("document"), (req, res, next) => {
@@ -22,14 +49,16 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
             message: "Document uploaded successfully!",
             documentCreated: {
                 _id: result._id,
-                document: result.document
+                language: req.body.language,
+                document: result.document,
+                annotated_document: addAnnotations(result.document, req.body.language)
             }
         })
     }).catch(err => {
-        console.log(err),
-            res.status(500).json({
-                error: err
-            });
+        console.log(err)
+        res.status(500).json({
+            error: err
+        });
     })
 })
 

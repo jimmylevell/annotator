@@ -6,7 +6,13 @@ const documentSchema = new Schema({
     name: {
         type: String
     },
+    language: {
+        type: String
+    },
     content: {
+        type: String
+    },
+    annotated_content: {
         type: String
     }
 }, {

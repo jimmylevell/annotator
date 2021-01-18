@@ -3,7 +3,10 @@ import { withRouter } from 'react-router-dom';
 import {
   withStyles,
   Typography,
-  Button
+  Button,
+  Select, 
+  MenuItem,
+  InputLabel
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { compose } from 'recompose';
@@ -27,20 +30,23 @@ const styles = theme => ({
     },
   },
 });
+const languages = ["English", "Czech"]
 
 class FileUploadComponent extends Component {
   constructor() {
     super();
 
     this.state = {      
-        loading: true,
         document: '',
+        language: "English",
 
+        loading: true,
         success: null,
         error: null,
       };
 
       this.onFileChange = this.onFileChange.bind(this);
+      this.handleLanguageChange = this.handleLanguageChange.bind(this)
       this.onSubmit = this.onSubmit.bind(this);
   }
 
@@ -76,6 +82,10 @@ class FileUploadComponent extends Component {
 
   onFileChange(evt) {
       this.setState({ document: evt.target.files[0] })
+  }
+
+  handleLanguageChange(evt) {
+    this.setState({ language: evt.target.value })
   }
 
   async onSubmit(evt) {
@@ -121,6 +131,21 @@ class FileUploadComponent extends Component {
               Choose Files
             </Button>
         </label>
+
+        <InputLabel id="labelInputLanguage">Language</InputLabel>
+        <Select
+          labelId="labelInputLanguage"
+          id="inputLanguage"
+          value={this.state.language}
+          onChange={this.handleLanguageChange}
+          required
+        >
+          {
+            languages.map((language, i) => (
+              <MenuItem keys={i} value={language}><em>{language}</em></MenuItem>
+            ))
+          }
+        </Select>
 
         <div className="file-name">
           {this.state.document && this.state.document.name.length > 0 && (

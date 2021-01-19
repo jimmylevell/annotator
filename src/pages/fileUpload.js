@@ -76,6 +76,15 @@ class FileUploadComponent extends Component {
         loading: false
       })
 
+      if(response.ok === false) {
+        console.error(response)
+        this.setState({
+          error: { message: "Error when talking with API. Error message: " + response.statusText}
+        })
+
+        return response
+      }
+
       return await response.json();
     } catch (error) {
       console.error(error);

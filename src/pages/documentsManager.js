@@ -109,7 +109,7 @@ class DocumentsManager extends Component {
     }
   }
 
-  shareDocumentLink(e, document) {
+  shareDocumentLink(e, document, navigator) {
     e.preventDefault()
     navigator.clipboard.writeText(window.location.origin + "/documents/" + document._id)
 
@@ -191,7 +191,7 @@ class DocumentsManager extends Component {
                           <ShareIcon />
                         </IconButton>
                       </TableCell>
-                      <TableCell onClick={(e) => this.deleteDocument(document)} color="inherit">
+                      <TableCell onClick={(e) => this.deleteDocument(e, document)} color="inherit">
                         <IconButton >
                           <DeleteIcon />
                         </IconButton>

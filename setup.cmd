@@ -14,8 +14,11 @@ docker run  ^
 docker pull ghcr.io/jimmylevell/annotator:latest
 docker run ^
             --network elitr ^
-            --env-file .env ^
+            --env-file /home/james/elitr/annotator/.env ^
+            -v /C/Daten/elitr/annotationFiles/annotations_en.csv:/usr/src/app/public/annotations_en.csv ^
+            -v C/Daten//elitr/annotationFiles/annotations_cz.csv:/usr/src/app/public/annotations_cz.csv ^
             -p 10000:10000 --name elitr-web -d --restart always ghcr.io/jimmylevell/annotator:latest
+
 
 # commands for managing docker container
 docker rm -f elitr-mongo

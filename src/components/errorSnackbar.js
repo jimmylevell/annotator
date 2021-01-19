@@ -30,7 +30,7 @@ const ErrorSnackbar = ({ id, message, onClose, classes }) => (
   <Snackbar
     open
     autoHideDuration={ 6000 }
-    onClose={onClose}
+    onClose={ onClose }
   >
     <SnackbarContent
       className={`${ classes.margin } ${ classes.snackbarContent }`}

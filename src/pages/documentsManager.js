@@ -4,12 +4,14 @@ import {
   withStyles,
   Typography,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   TextField,
-  IconButton
+  IconButton,
+  TableContainer, 
+  Table, 
+  TableHead, 
+  TableBody, 
+  TableCell,
+  TableRow
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ShareIcon from '@material-ui/icons/Share';
@@ -27,11 +29,17 @@ const styles = theme => ({
   documentsView: {
     whiteSpace: "inherit",
   },
-  linkStyle: {
-    color: 'black'
-  },
   searchInput: {
     width: "100%"
+  },
+  tableHeader: {
+    fontWeight: "bold"
+  },
+  tableRow: {
+    textDecoration: "none",
+    "&:hover": {
+      background: "#efefef"
+    },
   }
 });
 
@@ -86,13 +94,14 @@ class DocumentsManager extends Component {
     });
   }
 
-  async deleteDocument(document) {
-    if (window.confirm(`Are you sure you want to delete "${ document.name }"`)) {
+  async deleteDocument(e, document) {
+    e.preventDefault()
+    if (window.confirm(`Are you sure you want to delete the document "${ document.name }"`)) {
       await this.fetch('delete', `/documents/${ document._id }`);
 
       if(!this.state.error) {
         this.setState({
-          success: "document deleted successfully"
+          success: "Document deleted successfully"
         })
       }
 
@@ -100,11 +109,12 @@ class DocumentsManager extends Component {
     }
   }
 
-  shareDocumentLink(document) {
+  shareDocumentLink(e, document) {
+    e.preventDefault()
     navigator.clipboard.writeText(window.location.origin + "/documents/" + document._id)
 
     this.setState({
-      success: "Copied link to document in clipboard"
+      success: "Copied link to document to clipboard"
     })
   }
 
@@ -116,7 +126,6 @@ class DocumentsManager extends Component {
 
   render() {
     const { classes } = this.props;
-    const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL
 
     let that = this
     let documents = filter(this.state.documents, function(obj) {
@@ -143,45 +152,56 @@ class DocumentsManager extends Component {
         {this.state.documents.length > 0 ? (
           // documents available
           <Paper elevation={1} className={ classes.documentsView }>
-            <List>
-              {orderBy(documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
-                <ListItem key={ document._id }  button component={ Link } to={ `/documents/${document._id}` }>
-                  <ListItemText
-                    primary={ document.name }
-                  />
-
-                  <ListItemText>
-                    { document.content.length > MAX_LENGTH ? (
-                    <div>
-                        {`${ document.content.substring(0, MAX_LENGTH) }...` }
-                    </div>
-                    ) : (
-                    <div>
-                        { document.content }
-                    </div>
-                    )
-                    }
-                  </ListItemText>
-                  <ListItemSecondaryAction>
-                    <IconButton>
-                      <a href={`${ REACT_APP_BACKEND_URL }/api/documents/${document._id}/download`} className={classes.linkStyle}>
-                        <SaveAltIcon />
-                      </a>
-                    </IconButton>
-                    <IconButton component={Link} to={`/documents/${document._id}/edit`} color="inherit">
-                      <EditIcon/>
-                    </IconButton>
-                    <IconButton onClick={() => this.shareDocumentLink(document, navigator)} color="inherit">
-                      <ShareIcon />
-                    </IconButton>
-                    <IconButton onClick={() => this.deleteDocument(document)} color="inherit">
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
+            <TableContainer component={Paper}>
+              <Table className={classes.table} aria-label="data table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell className={ classes.tableHeader }>Document name</TableCell>
+                    <TableCell className={ classes.tableHeader }>Content</TableCell>
+                    <TableCell className={ classes.tableHeader }>Updated At</TableCell>
+                    <TableCell className={ classes.tableHeader }>Edit</TableCell>
+                    <TableCell className={ classes.tableHeader }>Share</TableCell>
+                    <TableCell className={ classes.tableHeader }>Remove</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orderBy(documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
+                    <TableRow key={document._id} className={classes.tableRow} component={Link} to={`/documents/${document._id}/`}>
+                      <TableCell component="th" scope="row">{document.name}</TableCell>
+                      <TableCell>
+                        { document.content.length > MAX_LENGTH ? (
+                          <div>
+                              {`${ document.content.substring(0, MAX_LENGTH) }...` }
+                          </div>
+                          ) : (
+                          <div>
+                              { document.content }
+                          </div>
+                          ) 
+                        }
+                      </TableCell>
+                      <TableCell>{document.updatedAt}</TableCell>
+                      <TableCell component={Link} to={`/documents/${document._id}/edit`} color="inherit">
+                        <IconButton >
+                          <EditIcon/>
+                        </IconButton>
+                      </TableCell>
+                      <TableCell onClick={(e) => this.shareDocumentLink(e, document, navigator)} color="inherit">
+                        <IconButton >
+                          <ShareIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell onClick={(e) => this.deleteDocument(document)} color="inherit">
+                        <IconButton >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            </Paper>
         ) : (
           // no documents available
           !this.state.loading && (

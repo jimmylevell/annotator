@@ -1,60 +1,94 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const multer  = require('multer')
+const multer  = require('multer');
 const router = express.Router();
-const stream = require('stream')
-const fs = require('fs')
+const stream = require('stream');
+const fs = require('fs');
 const neatCsv = require('neat-csv');
 
-
 let Document = require('../database/models/Document');
+// create multer virtual storage for temporal storage before document is saved on mongo db
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-function addAnnotations(document, language) {
-    let annoationFile = null
+// source of annoations 
+const ANNOTATION_FILE_EN = process.env.ANNOTATION_FILE_EN;
+const ANNOTATION_FILE_CZ = process.env.ANNOTATION_FILE_CZ;
 
-    if(language === "English") {
-        annoationFile = "public/annotations_en.csv"
-    } else if(language === "Czech") {
-        annoationFile = "public/annotations_cz.csv"
-    } else {
-        annoationFile = "public/annotations_en.csv"
-    }
+// function which escapes characters before being parsed through regex
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
 
-    fs.readFile(annoationFile, 'utf8' , async (err, data) => {
-        if (err) {
-            console.error(err)
-            return
+// function which enriches a given document with the annoations
+function addAnnotationsToDocument(document) {
+    return new Promise(function(resolve, reject) {
+        let annotatedContent = document.content
+        let language = document.language
+        let annoationFile = null
+
+        // select the correct annoation file
+        if(language === "English") {
+            annoationFile = ANNOTATION_FILE_EN
+        } else if(language === "Czech") {
+            annoationFile = ANNOTATION_FILE_CZ
+        } else {
+            // document has no language, through error 
+            reject("document does not have language")
         }
-    
-        let annotations = await neatCsv(data)
-        annotations.forEach(annotation => {
-            
-        }
+
+        fs.readFile(annoationFile, 'utf8' , async (err, data) => {
+            if (err) {
+                // error whil reading file
+                console.error(err)
+                reject(err)
+            }
+        
+            // iterate through the annotation and if maybe / yes replace it with a corresponding tag within the content 
+            // each annoation is given a unique key, but can occure multiple times within the document
+            let id = 1
+            let annotations = await neatCsv(data)
+            annotations.forEach(annotation => {
+                let annotationTag = "<ne name='" + id + "' decision='" + annotation.decision + "'>" + annotation.annotation + "</ne>"
+                if(annotation.decision === "yes" || annotation.decision === "maybe") {
+                    var re = new RegExp("\\b" + escapeRegExp(annotation.annotation) + "\\b", 'g');
+                    annotatedContent = annotatedContent.replace(re, annotationTag)
+                    id++
+                }
+            })
+
+            document.annotated_content = annotatedContent
+            resolve(document)
+        })
     })
 }
 
-// post method 
+// post method - creation of a new document
 router.post('/documents', upload.single("document"), (req, res, next) => {
+    // read document using multer and create document objcet
     let content = req.file.buffer.toString('utf8')
     const document = new Document({
         _id: new mongoose.Types.ObjectId(),
         name: req.file.originalname,
-        content: content
+        language: req.body.language,
+        content: content,
+        annotated_content: ""
     });
 
-    document.save().then(result => {
-        res.status(201).json({
-            message: "Document uploaded successfully!",
-            documentCreated: {
-                _id: result._id,
-                language: req.body.language,
-                document: result.document,
-                annotated_document: addAnnotations(result.document, req.body.language)
-            }
-        })
-    }).catch(err => {
+    // execute annoation of document
+    addAnnotationsToDocument(document)
+        .then(document => {
+            document.save().then(result => {
+                res.status(201).json({
+                    message: "Document uploaded successfully!",
+                    documentCreated: {
+                        _id: result._id,
+                        document: result,
+                    }
+                })
+        })    
+    })
+    .catch(err => {
         console.log(err)
         res.status(500).json({
             error: err
@@ -62,30 +96,33 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
     })
 })
 
+// get all documents
 router.get("/documents", (req, res, next) => {
     Document.find().then(data => {
         res.status(200).json({
-            message: "document list retrieved successfully!",
+            message: "Document list retrieved successfully!",
             documents: data
         });
     });
 });
 
+// get specific document by id
 router.get("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
     Document.findOne({ '_id': documentId}).then(data => {
         res.status(200).json({
-            message: "document retrieved successfully!",
+            message: "Document retrieved successfully!",
             documents: data
         });
     });
 });
 
-router.get("/documents/:id/download", (req, res, next) => {
+// provide download option of the original content as .txt of a given document
+router.get("/documents/:id/orgDoc/download", (req, res, next) => {
     let documentId = req.params.id
     Document.findOne({ '_id': documentId}).then(data => {
-        // output document content as html
-        let filename = data.name + ".html"
+        // output document content as .txt
+        let filename = data.name + ".txt"
         var fileContents = Buffer.from(data.content, "utf8");
 
         var readStream = new stream.PassThrough();
@@ -98,21 +135,67 @@ router.get("/documents/:id/download", (req, res, next) => {
     });
 });
 
+// provide download option of the annotated content as .xml of a given document
+router.get("/documents/:id/annotatedDoc/download", (req, res, next) => {
+    let documentId = req.params.id
+    Document.findOne({ '_id': documentId}).then(data => {
+        // output document content as xml
+        let filename = data.name + "_annotated.xml"
+        var fileContents = Buffer.from(data.annotated_content, "utf8");
+
+        var readStream = new stream.PassThrough();
+        readStream.end(fileContents);
+      
+        res.set('Content-disposition', 'attachment; filename=' + filename);
+        res.set('Content-Type', 'text/plain');
+      
+        readStream.pipe(res);
+    });
+});
+
+// get method - trigger update of the annoations
+router.get('/documents/:id/reannotate', (req, res, next) => {
+    let documentId = req.params.id
+    Document.findOne({ '_id': documentId}).then(data => {
+        // execute annoation of document
+        addAnnotationsToDocument(data)
+            .then(document => {
+                document.save().then(result => {
+                    res.status(201).json({
+                        message: "Document annoations updated successfully!",
+                        documentCreated: {
+                            _id: result._id,
+                            document: result,
+                        }
+                    })
+                })  
+            })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({
+                error: err
+            });
+        })
+    })
+})
+
+// update document content based on document id
 router.put("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
     Document.findOneAndUpdate({ '_id': documentId}, req.body).then(data => {
         res.status(200).json({
-            message: "document retrieved successfully!",
+            message: "Document updated successfully!",
             documents: data
         });
     });
 });
 
+// delete document based on id
 router.delete("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
     Document.deleteOne({ '_id': documentId}).then(data => {
         res.status(200).json({
-            message: "document deleted retrieved successfully!",
+            message: "Document deleted retrieved successfully!",
             documents: data
         });
     });

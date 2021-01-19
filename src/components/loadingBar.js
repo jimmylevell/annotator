@@ -8,6 +8,8 @@ import { withRouter } from 'react-router-dom';
 
 const styles = theme => ({
     loadingBar: {
+        position: "fixed",
+        top: theme.spacing(10),
         fontSize: 100,
         marginTop: theme.spacing(10),
         marginLeft: '50%'

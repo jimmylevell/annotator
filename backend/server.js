@@ -25,11 +25,12 @@ mongoose.connect(dbConfig.db, {
 let publicFolder = path.resolve(__dirname, '..')
 app.use(express.static(path.join(publicFolder, 'build')));
 
+// increase parsing capacity
 app.use(bodyParser.urlencoded({
     limit: "50mb",
     extended: true
   }));
-  app.use(bodyParser.json({limit: "50mb", extended: true}));
+app.use(bodyParser.json({limit: "50mb", extended: true}));
 
 app.use(cors());
 
@@ -43,4 +44,4 @@ const server = app.listen(port, () => {
 // forward all requests to the react app
 app.get('*', function(req, res) {
     res.sendFile(path.join(publicFolder, 'build', 'index.html'));
-  });
+});

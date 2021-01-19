@@ -1,9 +1,38 @@
-# Getting Started with Create React App
+# Annotator app
+## Scope
+Document manager for .txt documents enriching the documents with predefiend annotations. 
+The annotations are provided as .csv for each language. During the upload to the document manager the content is parsed and the annotations are insert has html tags. 
+In a userfriendly UI the annotators can see the enriched document. Additionally in this view the annotator can change the annotations and save them into the datebase.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Design
+### Frontend
+Using react in combination with the material design to create a intuitive UI.
+
+![screenshoot](documentation/screenshot.PNG)
+
+### Backend
+Backend API is using node and mongodb as datastore. 
+
+# Development
+Backend and frontend are combined in this project but each with individual package.json.     
+For the runtime the following env variable can control the application:
+
+    # react dev port
+    PORT=11000
+
+    BACKEND_PORT=10000
+
+    REACT_APP_BACKEND_URL="http://localhost:10000"
+    REACT_APP_CATPCHA_SITE_KEY="6LcGX-YZAAAAAGodFykzl6VvRuxcg_xbwT4ieAhy"
+
+    # marian DB connection string
+    MARIAN_DB_STRING=mongodb://mongoadmin:password@localhost:27017/document-db?authSource=admin
+
+# annotation file location
+ANNOTATION_FILE_EN=""
+ANNOTATION_FILE_CZ=""
 
 ## Available Scripts
-
 In the project directory, you can run:
 
 ### `npm start`
@@ -38,33 +67,3 @@ If you aren’t satisfied with the build tool and configuration choices, you can
 Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

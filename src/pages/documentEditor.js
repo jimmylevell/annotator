@@ -8,15 +8,24 @@ import {
 } from '@material-ui/core';
 import { compose } from 'recompose';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import LoadingBar from '../components/loadingBar';
 import ErrorSnackbar from '../components/errorSnackbar';
 import InfoSnackbar from '../components/infoSnackbar';
 
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL
 const styles = theme => ({
   contentInput: {
-    textAlign: 'left',
-    width: "99%",
+    width: "90%",
+    height: "55vh",
+    overflowY: "scroll",
+    overflowX: "none",
+    margin: theme.spacing(1),
+    fontSize: "1.2em"
+  },
+  buttons: {
     margin: theme.spacing(1)
   }
 });
@@ -35,6 +44,7 @@ class DocumentEditor extends Component {
     };
 
     this.handleSaveDocument = this.handleSaveDocument.bind(this)
+    this.handleUpdateAnnotations = this.handleUpdateAnnotations.bind(this)
   }
 
   componentDidMount = () => {
@@ -94,7 +104,17 @@ class DocumentEditor extends Component {
 
     if(!this.state.error) {
       this.setState({
-        success: "document saved successfully"
+        success: "Document saved successfully"
+      })
+    }
+  }
+
+  async handleUpdateAnnotations() {
+    await this.fetch('get', '/documents/' + this.state.documentId + "/reannotate")
+
+    if(!this.state.error) {
+      this.setState({
+        success: "Document reannotation completed successfully"
       })
     }
   }
@@ -111,10 +131,35 @@ class DocumentEditor extends Component {
           <div>
             <Typography variant="h5"> { this.state.document.name } </Typography>
 
-            <Button size="small" color="primary" onClick={ this.handleSaveDocument }><SaveAltIcon/>Save</Button>
+            <Button 
+              size="small" 
+              color="primary" 
+              onClick={ this.handleSaveDocument }
+              className={classes.buttons}
+            >
+              <SaveAltIcon/>Save
+            </Button>
+
+            <Button 
+              href={`${ REACT_APP_BACKEND_URL }/api/documents/${this.state.documentId}/orgDoc/download`}
+              size="small" 
+              color="primary"
+              className={classes.buttons}
+            >
+                <CloudDownloadIcon/>Download original document
+            </Button>
+
+            <Button 
+              size="small" 
+              color="primary" 
+              onClick={ this.handleUpdateAnnotations }
+              className={classes.buttons}
+            >
+              <RefreshIcon/>Update annotations
+            </Button>
+
             <TextField
               type="text"
-              label="Document content"
               value={ this.state.document.content }
               onChange={ this.handleChange }
               variant="outlined"

@@ -4,9 +4,9 @@ import {
   withStyles,
   Typography,
   Button,
-  Select, 
-  MenuItem,
-  InputLabel
+  Select,
+  InputLabel,
+  MenuItem
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { compose } from 'recompose';
@@ -39,6 +39,7 @@ class FileUploadComponent extends Component {
     this.state = {      
         document: '',
         language: "English",
+        inputFileKey: Date.now(),
 
         loading: true,
         success: null,
@@ -64,6 +65,10 @@ class FileUploadComponent extends Component {
 
       const response = await fetch(`/api${ endpoint }`, {
         method,
+        headers: {
+          "Accept": "application/json",
+          "type": "formData"
+        },
         body: body
       });
 
@@ -81,7 +86,9 @@ class FileUploadComponent extends Component {
   }
 
   onFileChange(evt) {
-      this.setState({ document: evt.target.files[0] })
+      this.setState({ 
+        document: evt.target.files[0] 
+      })
   }
 
   handleLanguageChange(evt) {
@@ -92,11 +99,15 @@ class FileUploadComponent extends Component {
       evt.preventDefault()
       const formData = new FormData()
 
+      // combine file input and input field
       formData.append('document', this.state.document)
+      formData.append('language', this.state.language)
+
       await this.fetch('post', "/documents", formData)
 
       this.setState({
-        document: null
+        document: null,
+        inputFileKey: Date.now()    // reset the input key so that the input field is regenerated (reset)
       })
 
       if(this.state.error === null) {
@@ -104,18 +115,19 @@ class FileUploadComponent extends Component {
           success: "Document uploaded successfully"
         })
       }
-  }
+  }  
 
   render() {
     const { classes } = this.props;
+    
     return (
       <Fragment>
         <Typography variant="h4">Document upload</Typography>
-
-        <form onSubmit={ this.onSubmit }>
+        <form encType="multipart/form-data" onSubmit={ this.onSubmit }>
           <label htmlFor="btn-upload">
             <input
               id="btn-upload"
+              key={this.state.inputFileKey}
               name="btn-upload"
               style={{ display: 'none' }}
               accept=".txt"
@@ -142,7 +154,7 @@ class FileUploadComponent extends Component {
         >
           {
             languages.map((language, i) => (
-              <MenuItem keys={i} value={language}><em>{language}</em></MenuItem>
+              <MenuItem key={i} value={language}><em>{language}</em></MenuItem>
             ))
           }
         </Select>

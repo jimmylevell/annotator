@@ -24,12 +24,12 @@ const App = ({ classes }) => (
   <Fragment>
       <CssBaseline />
       <AppHeader />
-      <main className={classes.main}>
-        <Route exact path="/" component={FilesUploadComponent} />
-        <Route exact path="/fileupload" component={FilesUploadComponent} />
-        <Route exact path="/documents" component={DocumentsManager} />
-        <Route exact path="/documents/:id" component={DocumentAnnotator} />
-        <Route exact path="/documents/:id/edit" component={DocumentEditor} />
+      <main className={ classes.main }>
+        <Route exact path="/" component={ FilesUploadComponent } />
+        <Route exact path="/fileupload" component={ FilesUploadComponent } />
+        <Route exact path="/documents" component={ DocumentsManager } />
+        <Route exact path="/documents/:id" component={ DocumentAnnotator } />
+        <Route exact path="/documents/:id/edit" component={ DocumentEditor } />
       </main>
     </Fragment>
   );

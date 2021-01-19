@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# build node app again with docker env variables
+# build node app again with currently present env variables
 npm run build
 
 # publish app

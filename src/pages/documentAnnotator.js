@@ -80,6 +80,15 @@ class DocumentAnnotator extends Component {
         loading: false
       })
 
+      if(response.ok === false) {
+        console.error(response)
+        this.setState({
+          error: { message: "Error when talking with API. Error message: " + response.statusText}
+        })
+
+        return response
+      }
+
       response = await response.json();
       return response.documents
     } catch (error) {

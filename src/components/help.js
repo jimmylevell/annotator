@@ -56,7 +56,7 @@ class Help extends Component {
   }
 
   render() {
-    const { classes, history } = this.props
+    const { classes } = this.props
     const APP_VERSION = process.env.REACT_APP_VERSION
 
     return (
@@ -64,7 +64,7 @@ class Help extends Component {
       {this.state.showModal && (
         <Modal
           className={ classes.modal }
-          onClose={() => history.goBack()}
+          onClose={ this.handleChange }
           open
         >
           <Card className={`${ classes.modalCard } ${ classes.marginTop }`}>

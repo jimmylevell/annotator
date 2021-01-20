@@ -76,6 +76,15 @@ class DocumentsManager extends Component {
         loading: false
       })
 
+      if(response.ok === false) {
+        console.error(response)
+        this.setState({
+          error: { message: "Error when talking with API. Error message: " + response.statusText}
+        })
+
+        return response
+      }
+
       response = await response.json();
       return response.documents
     } catch (error) {
@@ -111,10 +120,11 @@ class DocumentsManager extends Component {
 
   shareDocumentLink(e, document, navigator) {
     e.preventDefault()
-    navigator.clipboard.writeText(window.location.origin + "/documents/" + document._id)
+    let url = window.location.origin + "/documents/" + document._id
+    navigator.clipboard.writeText(url)
 
     this.setState({
-      success: "Copied link to document to clipboard"
+      success: "Copied link to document to clipboard: " + url
     })
   }
 

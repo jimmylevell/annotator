@@ -4,6 +4,7 @@ import {
   AppBar,
   Toolbar,
   Button,
+  Box,
   Typography,
   withStyles,
 } from '@material-ui/core';
@@ -14,9 +15,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Help from './help'
 
 const styles = theme => ({
-  flex: {
-    flex: 1,
-  },
   text: {
     fontSize: '4.5em',
     color: '#f50057',
@@ -38,6 +36,9 @@ const styles = theme => ({
     paddingRight: theme.spacing(1),
     textDecoration: 'none'
   },
+  displayName: {
+    marginRight: theme.spacing(10)
+  },
   helpIcon: {
     fontSize: '4.5em',
     color: 'white',
@@ -49,10 +50,21 @@ class AppHeader extends Component {
     super()
 
     this.state = {
+      person: localStorage.getItem("person") || "",
       showHelp: false
     }
 
     this.handleChange = this.handleChange.bind(this)
+  }
+
+  componentDidMount() {
+    if(this.state.person === "") {
+      let person = prompt("Please enter your name:", "Hairry Propper")
+
+      this.setState({
+        person: person
+      }, localStorage.setItem("person", person))
+    }
   }
 
   handleChange() {
@@ -75,8 +87,14 @@ class AppHeader extends Component {
         </Button>
 
         {/* link collection */}
-        <Link className={ classes.link } to="/fileupload">Upload</Link>
-        <Link className={ classes.link } to="/documents">Documents</Link>
+        <Box display='flex' flexGrow={ 1 }>
+            {/* whatever is on the left side */}
+          <Link className={ classes.link } to="/fileupload">Upload</Link>
+          <Link className={ classes.link } to="/documents">Documents</Link>
+        </Box>
+
+        {/* whatever is on the right side */}
+        <Typography className={ classes.displayName }>Hello, { this.state.person }</Typography>
       </Toolbar>
 
       <Button 

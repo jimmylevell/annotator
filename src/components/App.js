@@ -25,7 +25,7 @@ const App = ({ classes }) => (
       <CssBaseline />
       <AppHeader />
       <main className={ classes.main }>
-        <Route exact path="/" component={ FilesUploadComponent } />
+        <Route exact path="/" component={ DocumentsManager } />
         <Route exact path="/fileupload" component={ FilesUploadComponent } />
         <Route exact path="/documents" component={ DocumentsManager } />
         <Route exact path="/documents/:id" component={ DocumentAnnotator } />

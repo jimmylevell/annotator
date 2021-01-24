@@ -16,21 +16,14 @@ import ErrorSnackbar from '../components/errorSnackbar';
 import InfoSnackbar from '../components/infoSnackbar'
 
 const styles = theme => ({
-  useCase: {
-    marginTop: theme.spacing(2),
-    outline: 0,
+  form: {
+    marginTop: theme.spacing(2)
   },
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing(3),
-    right: theme.spacing(3),
-    [theme.breakpoints.down('xs')]: {
-      bottom: theme.spacing(2),
-      right: theme.spacing(2),
-    },
-  },
+  inputLabel: {
+    marginTop: theme.spacing(1)
+  }
 });
-const languages = ["English", "Czech"]
+const languages = ["English", "Czech"]      // language definition for dropdown
 
 class FileUploadComponent extends Component {
   constructor() {
@@ -39,11 +32,11 @@ class FileUploadComponent extends Component {
     this.state = {      
         document: '',
         language: "English",
-        inputFileKey: Date.now(),
+        inputFileKey: Date.now(),         // after the successfull upload of a document we have to reiinitialize the input field
 
-        loading: true,
-        success: null,
-        error: null,
+        loading: true,                   // flag for displaying loading bar
+        success: null,                   // flag for displaying success messages
+        error: null,                   // flag for displaying error messages
       };
 
       this.onFileChange = this.onFileChange.bind(this);
@@ -131,20 +124,21 @@ class FileUploadComponent extends Component {
     
     return (
       <Fragment>
-        <Typography variant="h4">Document upload</Typography>
-        <form encType="multipart/form-data" onSubmit={ this.onSubmit }>
+        <Typography variant="h4">Document Upload</Typography>
+        <form encType="multipart/form-data" className={ classes.form } onSubmit={ this.onSubmit }>
           <label htmlFor="btn-upload">
             <input
               id="btn-upload"
-              key={this.state.inputFileKey}
+              key={ this.state.inputFileKey }
               name="btn-upload"
-              style={{ display: 'none' }}
+              style={ { display: 'none' } }
               accept=".txt"
               type="file"
               onChange={ this.onFileChange } 
             />
 
             <Button
+              color="primary"
               className="btn-choose"
               variant="outlined"
               component="span" 
@@ -153,36 +147,39 @@ class FileUploadComponent extends Component {
             </Button>
         </label>
 
-        <InputLabel id="labelInputLanguage">Language</InputLabel>
+        <InputLabel id="labelInputLanguage" className={ classes.inputLabel }>Language</InputLabel>
         <Select
           labelId="labelInputLanguage"
           id="inputLanguage"
-          value={this.state.language}
-          onChange={this.handleLanguageChange}
+          value={ this.state.language }
+          onChange={ this.handleLanguageChange }
           required
         >
           {
             languages.map((language, i) => (
-              <MenuItem key={i} value={language}><em>{language}</em></MenuItem>
+              <MenuItem key={ i } value={ language }><em>{ language }</em></MenuItem>
             ))
           }
         </Select>
 
         <div className="file-name">
-          {this.state.document && this.state.document.name.length > 0 && (
-            <Typography>{ this.state.document.name }</Typography>
+          { /* show upload button and filename only if file has been selected*/}
+          { this.state.document && this.state.document.name.length > 0 && (
+            <Typography className={ classes.inputLabel }>File: { this.state.document.name }</Typography>
           )}
         </div>
           
           <Button size="small" 
             color="primary" 
             disabled={ !this.state.document } 
+            className={ classes.inputLabel }
             type="submit"
           >
             <AddIcon/>Upload
           </Button>
         </form>
 
+        { /* Flag based display of error snackbar */ }
         {this.state.error && (
         <ErrorSnackbar
           onClose={() => this.setState({ error: null })}
@@ -190,10 +187,12 @@ class FileUploadComponent extends Component {
         />
         )}
 
+        { /* Flag based display of loadingbar */ }
         {this.state.loading && (
           <LoadingBar/>
         )}
 
+        { /* Flag based display of info snackbar */ }
         {this.state.success && (
           <InfoSnackbar
             onClose={() => this.setState({ success: null })}

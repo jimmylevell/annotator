@@ -5,8 +5,10 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 
+const BASE_DIR = process.env.REACT_APP_BASE_DIR || "/"
+
 ReactDOM.render(
-  <BrowserRouter>
+  <BrowserRouter basename={ BASE_DIR }>
     <App />
   </BrowserRouter>,
   document.getElementById('root')

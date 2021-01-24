@@ -1,7 +1,13 @@
 {
   "name": "annotator-frontend",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimmylevell/annotator"
+  },
+  "homepage": "https://levell.ch/annotator/",
+  "license": "GNU General Public License v3.0",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -9,7 +15,6 @@
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",
     "axios": "^0.21.1",
-    "html-react-parser": "^1.2.1",
     "moment": "^2.29.1",
     "neat-csv": "^6.0.1",
     "react": "^17.0.1",

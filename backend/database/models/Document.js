@@ -11,6 +11,15 @@ const documentSchema = new Schema({
     language: {
         type: String
     },
+    annotators: {
+        type: Array
+    },
+    mentionedPeople: [
+        {
+            symbol: String,
+            name: String
+        }
+    ],
     content: {
         type: String
     },

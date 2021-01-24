@@ -16,7 +16,6 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete';
 import ShareIcon from '@material-ui/icons/Share';
 import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { orderBy, filter } from 'lodash';
 import { compose } from 'recompose';
 
@@ -25,6 +24,7 @@ import InfoSnackbar from '../components/infoSnackbar';
 import ErrorSnackbar from '../components/errorSnackbar';
 
 const MAX_LENGTH = 100
+const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const styles = theme => ({
   documentsView: {
     whiteSpace: "inherit",
@@ -67,7 +67,7 @@ class DocumentsManager extends Component {
         loading: true
       })
 
-      let response = await fetch(`/api${ endpoint }`, {
+      let response = await fetch(`${ REACT_APP_BASE_DIR }api${ endpoint }`, {
         method,
         body: body,
       });
@@ -90,7 +90,9 @@ class DocumentsManager extends Component {
     } catch (error) {
       console.error(error);
 
-      this.setState({ error });
+      this.setState({ 
+        error: { message: "Couldn't talk with api. API error: " + error}
+       });
     }
   }
 
@@ -103,8 +105,9 @@ class DocumentsManager extends Component {
     });
   }
 
-  async deleteDocument(e, document) {
-    e.preventDefault()
+  async deleteDocument(evt, document) {
+    evt.preventDefault()
+
     if (window.confirm(`Are you sure you want to delete the document "${ document.name }"`)) {
       await this.fetch('delete', `/documents/${ document._id }`);
 
@@ -118,8 +121,8 @@ class DocumentsManager extends Component {
     }
   }
 
-  shareDocumentLink(e, document, navigator) {
-    e.preventDefault()
+  shareDocumentLink(evt, document, navigator) {
+    evt.preventDefault()
     let url = window.location.origin + "/documents/" + document._id
     navigator.clipboard.writeText(url)
 
@@ -149,9 +152,9 @@ class DocumentsManager extends Component {
           key="inputQuery"
           placeholder="Search"
           label="Search"
-          className={classes.searchInput}
-          value={this.state.query}
-          onChange={this.handleSearchChange}
+          className={ classes.searchInput }
+          value={ this.state.query }
+          onChange={ this.handleSearchChange }
           variant="outlined"
           size="small"
           autoFocus 
@@ -161,9 +164,9 @@ class DocumentsManager extends Component {
         
         {this.state.documents.length > 0 ? (
           // documents available
-          <Paper elevation={1} className={ classes.documentsView }>
-            <TableContainer component={Paper}>
-              <Table className={classes.table} aria-label="data table">
+          <Paper elevation={ 1 } className={ classes.documentsView }>
+            <TableContainer component={ Paper }>
+              <Table className={ classes.table } aria-label="data table">
                 <TableHead>
                   <TableRow>
                     <TableCell className={ classes.tableHeader }>Document name</TableCell>
@@ -176,8 +179,9 @@ class DocumentsManager extends Component {
                 </TableHead>
                 <TableBody>
                   {orderBy(documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
-                    <TableRow key={document._id} className={classes.tableRow} component={Link} to={`/documents/${document._id}/`}>
-                      <TableCell component="th" scope="row">{document.name}</TableCell>
+                    <TableRow key={ document._id } className={ classes.tableRow } component={ Link } to={ `/documents/${ document._id }/` }>
+                      <TableCell component="th" scope="row">{ document.name }</TableCell>
+                      { /* Only show substring of content if it is to large */ }
                       <TableCell>
                         { document.content.length > MAX_LENGTH ? (
                           <div>
@@ -190,18 +194,18 @@ class DocumentsManager extends Component {
                           ) 
                         }
                       </TableCell>
-                      <TableCell>{document.updatedAt}</TableCell>
-                      <TableCell component={Link} to={`/documents/${document._id}/edit`} color="inherit">
+                      <TableCell>{ document.updatedAt }</TableCell>
+                      <TableCell component={Link} to={ `/documents/${ document._id }/edit` } color="inherit">
                         <IconButton >
                           <EditIcon/>
                         </IconButton>
                       </TableCell>
-                      <TableCell onClick={(e) => this.shareDocumentLink(e, document, navigator)} color="inherit">
+                      <TableCell onClick={(evt) => this.shareDocumentLink(evt, document, navigator)} color="inherit">
                         <IconButton >
                           <ShareIcon />
                         </IconButton>
                       </TableCell>
-                      <TableCell onClick={(e) => this.deleteDocument(e, document)} color="inherit">
+                      <TableCell onClick={(evt) => this.deleteDocument(evt, document)} color="inherit">
                         <IconButton >
                           <DeleteIcon />
                         </IconButton>
@@ -215,25 +219,28 @@ class DocumentsManager extends Component {
         ) : (
           // no documents available
           !this.state.loading && (
-            <Typography variant="subtitle1">So far no documents have been created</Typography>
+            <Typography variant="subtitle1">So far no documents have been uploaded</Typography>
           )
         )}
   
+        { /* Flag based display of error snackbar */ }
         {this.state.error && (
           <ErrorSnackbar
-            onClose={() => this.setState({ error: null })}
-            message={this.state.error.message}
+            onClose={ () => this.setState({ error: null }) }
+            message={ this.state.error.message }
           />
         )}
 
+        { /* Flag based display of loadingbar */ }
         {this.state.loading && (
           <LoadingBar/>
         )}
 
+        { /* Flag based display of info snackbar */ }
         {this.state.success && (
           <InfoSnackbar
-            onClose={() => this.setState({ success: null })}
-            message={this.state.success}
+            onClose={ () => this.setState({ success: null }) }
+            message={ this.state.success }
           />
         )}
       </Fragment>

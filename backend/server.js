@@ -8,6 +8,7 @@ const dbConfig = require('./database/db');
 const api = require('./routes/documentRoutes')
 const app = express();
 const port = process.env.BACKEND_PORT || 10000;
+const BASE_DIR = process.env.BASE_DIR || '/'
 
 // MongoDB Configuration
 mongoose.Promise = global.Promise;
@@ -33,9 +34,8 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json({limit: "50mb", extended: true}));
 
 app.use(cors());
-
-app.use('/public', express.static('public'));
-app.use('/api', api)
+app.use(BASE_DIR + 'public', express.static('public'));
+app.use(BASE_DIR + 'api', api)
 
 const server = app.listen(port, () => {
     console.log('Connected to port ' + port)

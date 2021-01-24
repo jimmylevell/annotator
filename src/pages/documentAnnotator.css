@@ -1,13 +1,30 @@
-ne[decision~="yes"] {
-    background-color: greenyellow;
+ne[status~="confirmed-at-type-level"], .confirmedAtTypeLevel {
+    background-color: green;
 }
 
-ne[decision~="maybe"] {
-    background-color: yellow;
-}
-
-ne[decision~="no"] {
+ne[status~="disproved-at-type-level"], .disprovedAtTypeLevel {
   background-color: red;
+}
+
+ne[status~="pending-at-token-level"], .pendingAtTokenLevel {
+  background-color: yellow;
+}
+
+ne[status~="confirmed-at-token-level"], .confirmedAtTokenLevel {
+  background-color: greenyellow;
+}
+
+ne[status~="disproved-at-token-level"], .disaprovedAtTokenLevel {
+  background-color: #ff9378;
+}
+
+ne[status~="new"], .newAnnotations {
+  background-color:#0390fc;
+}
+
+.highlight {
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .react-contextmenu {
@@ -25,69 +42,68 @@ ne[decision~="no"] {
     pointer-events: none;
     text-align: left;
     transition: opacity 250ms ease !important;
-  }
+}
   
-  .react-contextmenu.react-contextmenu--visible {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 9999;
-  }
-  
-  .react-contextmenu-item {
-    background: 0 0;
-    border: 0;
-    color: #373a3c;
-    cursor: pointer;
-    font-weight: 400;
-    line-height: 1.5;
-    padding: 3px 20px;
-    text-align: inherit;
-    white-space: nowrap;
-  }
-  
-  .react-contextmenu-item.react-contextmenu-item--active,
-  .react-contextmenu-item.react-contextmenu-item--selected {
-    color: #fff;
-    background-color: #20a0ff;
-    border-color: #20a0ff;
-    text-decoration: none;
-  }
-  
-  .react-contextmenu-item.react-contextmenu-item--disabled,
-  .react-contextmenu-item.react-contextmenu-item--disabled:hover {
-    background-color: transparent;
-    border-color: rgba(0, 0, 0, 0.15);
-    color: #878a8c;
-  }
-  
-  .react-contextmenu-item--divider {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-    cursor: inherit;
-    margin-bottom: 3px;
-    padding: 2px 0;
-  }
-  .react-contextmenu-item--divider:hover {
-    background-color: transparent;
-    border-color: rgba(0, 0, 0, 0.15);
-  }
-  
-  .react-contextmenu-item.react-contextmenu-submenu {
-    padding: 0;
-  }
-  
-  .react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item {
-  }
-  
-  .react-contextmenu-item.react-contextmenu-submenu
-    > .react-contextmenu-item:after {
-    content: '▶';
-    display: inline-block;
-    position: absolute;
-    right: 7px;
-  }
-  
-  .example-multiple-targets::after {
-    content: attr(data-count);
-    display: block;
-  }
-  
+.react-contextmenu.react-contextmenu--visible {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 9999;
+}
+
+.react-contextmenu-item {
+  background: 0 0;
+  border: 0;
+  color: #373a3c;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 3px 20px;
+  text-align: inherit;
+  white-space: nowrap;
+}
+
+.react-contextmenu-item.react-contextmenu-item--active,
+.react-contextmenu-item.react-contextmenu-item--selected {
+  color: #fff;
+  background-color: #20a0ff;
+  border-color: #20a0ff;
+  text-decoration: none;
+}
+
+.react-contextmenu-item.react-contextmenu-item--disabled,
+.react-contextmenu-item.react-contextmenu-item--disabled:hover {
+  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #878a8c;
+}
+
+.react-contextmenu-item--divider {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: inherit;
+  margin-bottom: 3px;
+  padding: 2px 0;
+}
+.react-contextmenu-item--divider:hover {
+  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.react-contextmenu-item.react-contextmenu-submenu {
+  padding: 0;
+}
+
+.react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item {
+}
+
+.react-contextmenu-item.react-contextmenu-submenu
+  > .react-contextmenu-item:after {
+  content: '▶';
+  display: inline-block;
+  position: absolute;
+  right: 7px;
+}
+
+.example-multiple-targets::after {
+  content: attr(data-count);
+  display: block;
+}

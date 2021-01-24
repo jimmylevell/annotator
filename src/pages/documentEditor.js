@@ -15,13 +15,11 @@ import LoadingBar from '../components/loadingBar';
 import ErrorSnackbar from '../components/errorSnackbar';
 import InfoSnackbar from '../components/infoSnackbar';
 
-const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL
+const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL + REACT_APP_BASE_DIR
 const styles = theme => ({
   contentInput: {
     width: "90%",
-    height: "55vh",
-    overflowY: "scroll",
-    overflowX: "none",
     margin: theme.spacing(1),
     fontSize: "1.2em"
   },
@@ -38,13 +36,24 @@ class DocumentEditor extends Component {
       documentId: null,
       document: null,
 
-      success: null,
-      loading: true,
-      error: null,
+      changed: false,       // flag for initializing automatic save
+      success: null,        // flag for displaying success messages
+      loading: true,        // flag for displaying loading bar
+      error: null,        // flag for displaying error messages
     };
 
     this.handleSaveDocument = this.handleSaveDocument.bind(this)
     this.handleUpdateAnnotations = this.handleUpdateAnnotations.bind(this)
+  }
+
+  componentDidUpdate = () => {
+    // automatically save document every 10 secounds when something has been changed 
+    let that = this
+    setInterval(function(){
+      if(that.state.changed) {
+        that.handleSaveDocument()
+      }
+    }, 10000)
   }
 
   componentDidMount = () => {
@@ -62,7 +71,7 @@ class DocumentEditor extends Component {
         loading: true
       })
 
-      let response = await fetch(`/api${ endpoint }`, {
+      let response = await fetch(`${ REACT_APP_BASE_DIR }api${ endpoint }`, {
         method,
         body: JSON.stringify(body),
         headers: {
@@ -104,7 +113,9 @@ class DocumentEditor extends Component {
     let document = this.state.document
     document.content = evt.target.value
     
+    // save changed document and set changed flag
     this.setState({
+      changed: true,
       document: document
     })
   }
@@ -113,7 +124,9 @@ class DocumentEditor extends Component {
     await this.fetch('put', '/documents/' + this.state.documentId, this.state.document)
 
     if(!this.state.error) {
+      // save changed document and set changed flag false
       this.setState({
+        changed: false,
         success: "Document saved successfully"
       })
     }
@@ -145,25 +158,25 @@ class DocumentEditor extends Component {
               size="small" 
               color="primary" 
               onClick={ this.handleSaveDocument }
-              className={classes.buttons}
+              className={ classes.buttons }
             >
               <SaveAltIcon/>Save
             </Button>
 
             <Button 
-              href={`${ REACT_APP_BACKEND_URL }/api/documents/${this.state.documentId}/orgDoc/download`}
+              href={`${ REACT_APP_BACKEND_URL }api/documents/${ this.state.documentId }/orgDoc/download`}
               size="small" 
               color="primary"
-              className={classes.buttons}
+              className={ classes.buttons }
             >
-                <CloudDownloadIcon/>Download original document
+                <CloudDownloadIcon/>Download original document .txt
             </Button>
 
             <Button 
               size="small" 
               color="primary" 
               onClick={ this.handleUpdateAnnotations }
-              className={classes.buttons}
+              className={ classes.buttons }
             >
               <RefreshIcon/>Update annotations
             </Button>
@@ -186,6 +199,7 @@ class DocumentEditor extends Component {
           )
         )}
 
+        { /* Flag based display of error snackbar */ }            
         {this.state.error && (
           <ErrorSnackbar
             onClose={() => this.setState({ error: null })}
@@ -193,10 +207,12 @@ class DocumentEditor extends Component {
           />
         )}
 
+        { /* Flag based display of loadingbar */ }
         {this.state.loading && (
           <LoadingBar/>
         )}
 
+        { /* Flag based display of info snackbar */ }
         {this.state.success && (
           <InfoSnackbar
             onClose={() => this.setState({ success: null })}

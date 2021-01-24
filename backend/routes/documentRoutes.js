@@ -5,6 +5,7 @@ const router = express.Router();
 const stream = require('stream');
 const fs = require('fs');
 const neatCsv = require('neat-csv');
+const converter = require('json-2-csv');
 
 let Document = require('../database/models/Document');
 // create multer virtual storage for temporal storage before document is saved on mongo db
@@ -14,10 +15,30 @@ const upload = multer({ storage: storage });
 // source of annoations 
 const ANNOTATION_FILE_EN = process.env.ANNOTATION_FILE_EN;
 const ANNOTATION_FILE_CZ = process.env.ANNOTATION_FILE_CZ;
+const ANNOTATOR = process.env.ANNOTATOR
 
 // function which escapes characters before being parsed through regex
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+// function to detect any people symbols (e.g (J) and extract them)
+function extractPeopleChars(document) {
+    let personResult = []
+    const regex = /(\([A-z]\))/gm
+    let people = document.content.match(regex)
+
+    // make results unique
+    people = new Set(people)
+
+    people.forEach(person =>{
+        let personObject = { symbol: "", name: "" }
+        personObject.symbol = person
+
+        personResult.push(personObject)
+    })
+
+    return personResult
 }
 
 // function which enriches a given document with the annoations
@@ -49,12 +70,25 @@ function addAnnotationsToDocument(document) {
             let id = 1
             let annotations = await neatCsv(data)
             annotations.forEach(annotation => {
-                let annotationTag = "<ne name='" + id + "' decision='" + annotation.decision + "'>" + annotation.annotation + "</ne>"
-                if(annotation.decision === "yes" || annotation.decision === "maybe") {
-                    var re = new RegExp("\\b" + escapeRegExp(annotation.annotation) + "\\b", 'g');
-                    annotatedContent = annotatedContent.replace(re, annotationTag)
-                    id++
+                let tagStatus = ""
+                let tagAnnotator = ""
+                if(annotation.decision === "yes") {
+                    tagStatus = "confirmed-at-type-level"
+                    tagAnnotator = ANNOTATOR
+                } else if (annotation.decision === "no") {
+                    tagStatus = "disproved-at-type-level"
+                    tagAnnotator = ANNOTATOR
+                } else {
+                    tagStatus = "pending-at-token-level"
+                    tagAnnotator = "pending"
                 }
+
+                var regEx = new RegExp("\\b" + escapeRegExp(annotation.annotation) + "\\b", 'g');
+                annotatedContent = annotatedContent.replace(regEx, function() {
+                    let tag = "<NE id='" + id + "' status='" + tagStatus + "' annotator='" + tagAnnotator + "'>" + annotation.annotation + "</NE>"
+                    id++
+                    return tag
+                })
             })
 
             document.annotated_content = annotatedContent
@@ -78,6 +112,7 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
     // execute annoation of document
     addAnnotationsToDocument(document)
         .then(document => {
+            document.mentionedPeople = extractPeopleChars(document)
             document.save().then(result => {
                 res.status(201).json({
                     message: "Document uploaded successfully!",
@@ -122,7 +157,7 @@ router.get("/documents/:id/orgDoc/download", (req, res, next) => {
     let documentId = req.params.id
     Document.findOne({ '_id': documentId}).then(data => {
         // output document content as .txt
-        let filename = data.name + ".txt"
+        let filename = data.name
         var fileContents = Buffer.from(data.content, "utf8");
 
         var readStream = new stream.PassThrough();
@@ -132,6 +167,30 @@ router.get("/documents/:id/orgDoc/download", (req, res, next) => {
         res.set('Content-Type', 'text/plain');
       
         readStream.pipe(res);
+    });
+});
+
+// provide download option of the mentioned people as .csv of a given document
+router.get("/documents/:id/mentionedPeople/download", (req, res, next) => {
+    let documentId = req.params.id
+    Document.findOne({ '_id': documentId}).then(data => {
+        // output document content as .csv
+        let filename = data.name + "_mentionedPeople.csv"
+
+        converter.json2csv(data.mentionedPeople, (err, csv) => {
+            if(err) {
+                throw err
+            }
+
+            var fileContents = Buffer.from(csv, "utf8");
+            var readStream = new stream.PassThrough();
+            readStream.end(fileContents);
+          
+            res.set('Content-disposition', 'attachment; filename=' + filename);
+            res.set('Content-Type', 'text/plain');
+          
+            readStream.pipe(res);
+        }, { keys: ["symbol", "name"]})
     });
 });
 
@@ -160,6 +219,7 @@ router.get('/documents/:id/reannotate', (req, res, next) => {
         // execute annoation of document
         addAnnotationsToDocument(data)
             .then(document => {
+                document.mentionedPeople = extractPeopleChars(document)
                 document.save().then(result => {
                     res.status(201).json({
                         message: "Document annoations updated successfully!",
@@ -182,6 +242,7 @@ router.get('/documents/:id/reannotate', (req, res, next) => {
 // update document content based on document id
 router.put("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
+    
     Document.findOneAndUpdate({ '_id': documentId}, req.body).then(data => {
         res.status(200).json({
             message: "Document updated successfully!",

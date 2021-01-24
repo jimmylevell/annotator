@@ -24,6 +24,7 @@ const styles = theme => ({
   }
 });
 const languages = ["English", "Czech"]      // language definition for dropdown
+const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 
 class FileUploadComponent extends Component {
   constructor() {
@@ -56,7 +57,7 @@ class FileUploadComponent extends Component {
         loading: true,
       })
 
-      const response = await fetch(`/api${ endpoint }`, {
+      const response = await fetch(`${ REACT_APP_BASE_DIR }api${ endpoint }`, {
         method,
         headers: {
           "Accept": "application/json",

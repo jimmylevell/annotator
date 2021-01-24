@@ -13,7 +13,7 @@ import DocumentAnnotator from '../pages/documentAnnotator';
 
 const styles = theme => ({
   main: {
-    padding: theme.spacing(1),
+    padding: theme.spacing(3),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(0.5),
     },
@@ -26,6 +26,7 @@ const App = ({ classes }) => (
       <AppHeader />
       <main className={ classes.main }>
         <Route exact path="/" component={ DocumentsManager } />
+        <Route exact path="/annotator" component={ DocumentsManager } />
         <Route exact path="/fileupload" component={ FilesUploadComponent } />
         <Route exact path="/documents" component={ DocumentsManager } />
         <Route exact path="/documents/:id" component={ DocumentAnnotator } />

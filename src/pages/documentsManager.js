@@ -28,8 +28,10 @@ const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const styles = theme => ({
   documentsView: {
     whiteSpace: "inherit",
+    marginTop: theme.spacing(2)
   },
   searchInput: {
+    marginBottom: theme.spacing(2),
     width: "100%"
   },
   tableHeader: {
@@ -38,7 +40,7 @@ const styles = theme => ({
   tableRow: {
     textDecoration: "none",
     "&:hover": {
-      background: "#efefef"
+      background: "#d6effb"
     },
   }
 });

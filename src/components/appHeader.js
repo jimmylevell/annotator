@@ -15,6 +15,9 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Help from './help'
 
 const styles = theme => ({
+  header: {
+    backgroundColor: "#3892bd",
+  },
   text: {
     fontSize: '4.5em',
     color: '#f50057',
@@ -77,7 +80,7 @@ class AppHeader extends Component {
     const { classes } = this.props;
     
     return (
-    <AppBar position="static">
+    <AppBar position="static" className={ classes.header }>
       <Toolbar className={ classes.toolBar }>
         <Button color="inherit" component={ Link } to="/">
           <FeedbackIcon/>

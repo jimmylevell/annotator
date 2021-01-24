@@ -20,7 +20,7 @@ const styles = theme => ({
   },
   modalCard: {
     width: '90%',
-    maxWidth: 500,
+    maxWidth: 700,
   },
   modalCardContent: {
     display: 'flex',
@@ -29,6 +29,9 @@ const styles = theme => ({
   marginTop: {
     marginTop: theme.spacing(10),
   },
+  title: {
+    marginTop: theme.spacing(2)
+  }
 });
 
 class Help extends Component {
@@ -70,16 +73,15 @@ class Help extends Component {
           <Card className={`${ classes.modalCard } ${ classes.marginTop }`}>
               <CardContent className={ classes.modalCardContent }>
               <Typography variant="h6">About the app</Typography>
-              <Typography> Application for centrally storing and managing documents. The documents can be enriched with annotation stored in csv files. The csv files are defined per languguage. The annotator can view and change the annotations of a document. </Typography>
+              <Typography> This application is for centrally storing and managing documents. These documents can be enriched with annotation stored in csv files. The csv files are defined per language. You can view and change the annotations of a document. </Typography>
               <Typography>App version: { APP_VERSION }</Typography>
-              <Typography variant="h6">Process</Typography>
-              <Typography>Upload .txt document -> automatic addition of annotation in a safe context -> change of the annoation -> export annotated document as .xml</Typography>
+              <Typography className={ classes.title } variant="h6">Process</Typography>
+              <Typography>Upload .txt document -> application automaticaly adds annotations in a safe context -> change the annotations -> export the annotated document as .xml</Typography>
               <br/>
-              <Typography>Through the "Upload" button you are able to save a .txt document to the database. During this process the content of the document is being annoated based on the .csv source annotation file. </Typography>
-              <Typography>It is important to note that the original content is always left unchanged and the annoations are made in a separte and isolated context. </Typography>
-              <Typography>Through the edit button on the document view you are able to edit the original content of the document. The seperate and isolated annoation context is not automatically updated. This has to be manually triggered through the corresponding button in the edit view.</Typography>
-              <Typography>The annotated document can be send to an annotator which has the possibility to change the annoations of maybe annotations and save the annotated document again. </Typography>
-              <Typography>The annotator can not change the annotations which have the decision "yes". </Typography>
+              <Typography>Through the "Upload" button you are able to save a .txt document to the application. During this process, the content of the document is being annotated based on the .csv source annotation file. </Typography>
+              <Typography>It is important to note that the original content is always left unchanged and the annotations are made in a separate and isolated context. </Typography>
+              <Typography>Through the "Edit" button on the document view, you are able to edit the original content of the document. The seperated and isolated annotation context is not automatically updated. This has to be manually triggered through the corresponding button in the edit view.</Typography>
+              <Typography>The annotated document can be send to an annotator which has the possibility to change the annotations. </Typography>
               </CardContent>          
               <CardActions>
                 <Button size="small" onClick={ this.handleChange }><ClearIcon/>Close</Button>

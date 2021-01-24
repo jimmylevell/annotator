@@ -25,17 +25,18 @@ const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL + REACT_APP_BASE_DIR
 const styles = theme => ({
   annotatorView: {
-    width: "89%",
+    width: "85%",
     height: "55vh",
     overflowY: "scroll",
     overflowX: "none",
     whiteSpace: "pre-wrap",
-    margin: theme.spacing(1),
-
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+    marginRight: theme.spacing(2),
     fontSize: "1.2em"
   },
   annotatorViewAction: {
-    width: "10%",
+    width: "15%",
     float: "left",
   },
   buttons: {
@@ -359,6 +360,7 @@ class DocumentAnnotator extends Component {
                           <TextField
                             type="text"
                             name={ "peopleInput-" + i}
+                            fullWidth={ true }
                             key={i}
                             value={ this.state.document.mentionedPeople[i].name }
                             onChange={ this.handlePeopleChange }
@@ -371,10 +373,10 @@ class DocumentAnnotator extends Component {
                   { /* explanation of the color code */ }
                   <Typography variant="h6">Color Code</Typography>
                   <Typography className="confirmedAtTypeLevel">Confirmed at type level</Typography>
-                  <Typography className="disprovedAtTypeLevel">Disaproved at type level</Typography>
+                  <Typography className="disprovedAtTypeLevel">Disproved at type level</Typography>
                   <Typography className="pendingAtTokenLevel">Pending at token level</Typography>
                   <Typography className="confirmedAtTokenLevel">Confirmed at token level</Typography>
-                  <Typography className="disaprovedAtTokenLevel">Disaproved at token level</Typography>
+                  <Typography className="disaprovedAtTokenLevel">Disproved at token level</Typography>
                   <Typography className="newAnnotations">New annotations</Typography>
                 </Box>
             </Box>

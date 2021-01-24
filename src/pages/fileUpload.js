@@ -17,10 +17,10 @@ import InfoSnackbar from '../components/infoSnackbar'
 
 const styles = theme => ({
   form: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(4)
   },
   inputLabel: {
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(4)
   }
 });
 const languages = ["English", "Czech"]      // language definition for dropdown
@@ -170,8 +170,9 @@ class FileUploadComponent extends Component {
           )}
         </div>
           
-          <Button size="small" 
+          <Button
             color="primary" 
+            variant="outlined"
             disabled={ !this.state.document } 
             className={ classes.inputLabel }
             type="submit"

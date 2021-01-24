@@ -1,9 +1,9 @@
 ne[status~="confirmed-at-type-level"], .confirmedAtTypeLevel {
-    background-color: green;
+    background-color: #3cb93c;
 }
 
 ne[status~="disproved-at-type-level"], .disprovedAtTypeLevel {
-  background-color: red;
+  background-color: #f32727;
 }
 
 ne[status~="pending-at-token-level"], .pendingAtTokenLevel {
@@ -15,11 +15,11 @@ ne[status~="confirmed-at-token-level"], .confirmedAtTokenLevel {
 }
 
 ne[status~="disproved-at-token-level"], .disaprovedAtTokenLevel {
-  background-color: #ff9378;
+  background-color: #ff8609;
 }
 
 ne[status~="new"], .newAnnotations {
-  background-color:#0390fc;
+  background-color: #69c6f3;
 }
 
 .highlight {

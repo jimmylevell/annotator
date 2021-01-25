@@ -58,16 +58,22 @@ class AppHeader extends Component {
     }
 
     this.handleChange = this.handleChange.bind(this)
+    this.handleNameChange = this.handleNameChange.bind(this)
   }
 
   componentDidMount() {
     if(this.state.person === "") {
-      let person = prompt("Please enter your name:", "Hairry Propper")
-
-      this.setState({
-        person: person
-      }, localStorage.setItem("person", person))
+      this.handleNameChange()
     }
+  }
+
+  handleNameChange() {
+    let person = localStorage.getItem("person") || "Hairy Potter"
+    person = prompt("Please enter your name:", person)
+
+    this.setState({
+      person: person
+    }, localStorage.setItem("person", person))
   }
 
   handleChange() {
@@ -97,7 +103,7 @@ class AppHeader extends Component {
         </Box>
 
         {/* whatever is on the right side */}
-        <Typography className={ classes.displayName }>Hello, { this.state.person }</Typography>
+        <Typography className={ classes.displayName } onClick={ this.handleNameChange }>Hello, { this.state.person }</Typography>
       </Toolbar>
 
       <Button 

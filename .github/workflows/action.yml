@@ -38,3 +38,13 @@ jobs:
           file: ./Dockerfile
           tags: |
             ghcr.io/jimmylevell/annotator:latest
+      -
+       name: Deploy to Docker swarm
+       uses: wshihadeh/docker-deployment-action@v1
+       with:
+          remote_docker_host: docker@levell.ch
+          ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
+          deployment_mode: docker-swarm
+          pull_images_first: 'true'
+          args: ghcr.io/jimmylevell/annotator:latest

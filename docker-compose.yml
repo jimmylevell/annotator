@@ -1,0 +1,34 @@
+version: '3.3'
+
+services:
+   elitr-mongo:
+    image: mongo:latest
+    ports: 
+      - "27017:27017"
+    restart: always
+    networks:
+      elitr:
+    volumes: 
+      - /C/Daten/elitr/mongo:/data/db
+   elitr-web:
+     image: ghcr.io/jimmylevell/annotator:latest
+     ports:
+      - "10000:10000"
+     depends_on:
+      - elitr-mongo
+     restart: always
+     env_file: .env
+     networks:
+      elitr:
+     volumes: 
+      - C:\Daten\test:/usr/src/app/projectFiles
+     deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+networks:
+  elitr:

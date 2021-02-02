@@ -43,7 +43,7 @@ jobs:
             ghcr.io/jimmylevell/annotator:latest
       -
        name: Deploy to Docker swarm
-       uses: wshihadeh/docker-deployment-action@v1
+       uses: wshihadeh/docker-deployment-action@v2
        with:
           remote_docker_host: docker@levell.ch
           ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}

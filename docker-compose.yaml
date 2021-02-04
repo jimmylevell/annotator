@@ -9,7 +9,7 @@ services:
     networks:
       elitr:
     volumes: 
-      - /C/Daten/elitr/mongo:/data/db
+      - /home/james/elitr/mongo:/data/db
     deploy:
       replicas: 1
       update_config:

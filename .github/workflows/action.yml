@@ -34,14 +34,6 @@ jobs:
         name: copy env 
         run: cp example.env .env
       -
-        name: Build and push annotator docker
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: ./Dockerfile
-          tags: |
-            ghcr.io/jimmylevell/annotator:latest
-      -
        name: Deploy to Docker swarm
        uses: wshihadeh/docker-deployment-action@v2
        with:

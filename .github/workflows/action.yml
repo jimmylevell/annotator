@@ -42,4 +42,5 @@ jobs:
           ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
           deployment_mode: docker-swarm
           pull_images_first: 'true'
-          args: (cd /home/james/elitr/annotator/ && docker-compose config) elitr
+          copy_stack_file: 'true'
+          args: elitr

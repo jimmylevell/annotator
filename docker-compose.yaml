@@ -32,3 +32,4 @@ services:
 
 networks:
   elitr:
+   name: elitr

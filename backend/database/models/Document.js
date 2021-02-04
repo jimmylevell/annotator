@@ -8,6 +8,9 @@ const documentSchema = new Schema({
     name: {
         type: String
     },
+    meetingId: {
+        type: String
+    },
     language: {
         type: String
     },

@@ -10,6 +10,7 @@ RUN apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false upd
 RUN apt-get upgrade -y
 RUN apt-get install vim -y
 RUN apt-get install net-tools -y
+RUN apt-get install dos2unix
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -21,6 +22,7 @@ RUN npm run build
 RUN cd backend/ && npm install
 
 RUN chmod +x docker/entrypoint.sh
+RUN dos2unix docker/entrypoint.sh
 
 # publish app
 EXPOSE 10000

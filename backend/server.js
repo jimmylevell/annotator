@@ -34,7 +34,6 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json({limit: "50mb", extended: true}));
 
 app.use(cors());
-app.use(BASE_DIR + 'public', express.static('public'));
 app.use(BASE_DIR + 'api', api)
 
 const server = app.listen(port, () => {

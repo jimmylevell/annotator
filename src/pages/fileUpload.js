@@ -6,7 +6,8 @@ import {
   Button,
   Select,
   InputLabel,
-  MenuItem
+  MenuItem,
+  TextField
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { compose } from 'recompose';
@@ -20,7 +21,11 @@ const styles = theme => ({
     marginTop: theme.spacing(4)
   },
   inputLabel: {
-    marginTop: theme.spacing(4)
+    marginTop: theme.spacing(4),
+  },
+  textInput: {
+    marginTop: theme.spacing(4),
+    display: "block"
   }
 });
 const languages = ["English", "Czech"]      // language definition for dropdown
@@ -41,7 +46,7 @@ class FileUploadComponent extends Component {
       };
 
       this.onFileChange = this.onFileChange.bind(this);
-      this.handleLanguageChange = this.handleLanguageChange.bind(this)
+      this.handleChange = this.handleChange.bind(this)
       this.onSubmit = this.onSubmit.bind(this);
   }
 
@@ -94,8 +99,14 @@ class FileUploadComponent extends Component {
       })
   }
 
-  handleLanguageChange(evt) {
-    this.setState({ language: evt.target.value })
+  handleChange = (evt) => {
+    const target = evt.target
+    const name = target.name
+    let value = target.value
+
+    this.setState({
+      [name]: value
+    })
   }
 
   async onSubmit(evt) {
@@ -104,6 +115,7 @@ class FileUploadComponent extends Component {
 
       // combine file input and input field
       formData.append('document', this.state.document)
+      formData.append('meetingId', this.state.meetingId)
       formData.append('language', this.state.language)
 
       await this.fetch('post', "/documents", formData)
@@ -148,12 +160,23 @@ class FileUploadComponent extends Component {
             </Button>
         </label>
 
+        <TextField
+          required
+          key="inputMeetingId"
+          name="meetingId"
+          label="Meeting id"
+          type="text"
+          value={ this.state.meetingId }
+          onChange={ this.handleChange }
+          className={ classes.textInput }
+        />
+
         <InputLabel id="labelInputLanguage" className={ classes.inputLabel }>Language</InputLabel>
         <Select
           labelId="labelInputLanguage"
           id="inputLanguage"
           value={ this.state.language }
-          onChange={ this.handleLanguageChange }
+          onChange={ this.handleChange }
           required
         >
           {

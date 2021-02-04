@@ -15,8 +15,7 @@ docker pull ghcr.io/jimmylevell/annotator:latest
 docker run \
             --network elitr \
             --env-file /home/james/elitr/annotator/.env \
-            -v /home/james/elitr/annotationFiles/annotations_en.csv:/usr/src/app/public/annotations_en.csv \
-            -v /home/james/elitr/annotationFiles/annotations_cz.csv:/usr/src/app/public/annotations_cz.csv \
+            -v /home/james/elitr/annotationFiles:/usr/src/app/externalFiles \
             -p 10000:10000 --name elitr-web -d --restart always ghcr.io/jimmylevell/annotator:latest
 
 # commands for managing docker container

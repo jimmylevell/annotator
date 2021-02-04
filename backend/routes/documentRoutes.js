@@ -104,6 +104,7 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
     const document = new Document({
         _id: new mongoose.Types.ObjectId(),
         name: req.file.originalname,
+        meetingId: req.body.meetingId,
         language: req.body.language,
         content: content,
         annotated_content: ""

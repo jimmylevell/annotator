@@ -15,8 +15,7 @@ docker pull ghcr.io/jimmylevell/annotator:latest
 docker run ^
             --network elitr ^
             --env-file C:\Daten\git\annotator\.env ^
-            -v /C/Daten/elitr/annotationFiles/annotations_en.csv:/usr/src/app/public/annotations_en.csv ^
-            -v C/Daten//elitr/annotationFiles/annotations_cz.csv:/usr/src/app/public/annotations_cz.csv ^
+            -v /C/Daten/elitr/annotationFiles:/usr/src/app/externalFiles ^
             -p 10000:10000 --name elitr-web -d --restart always ghcr.io/jimmylevell/annotator:latest
 
 

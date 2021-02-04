@@ -172,6 +172,8 @@ class DocumentsManager extends Component {
                 <TableHead>
                   <TableRow>
                     <TableCell className={ classes.tableHeader }>Document name</TableCell>
+                    <TableCell className={ classes.tableHeader }>Meeting id</TableCell>
+                    <TableCell className={ classes.tableHeader }>Annotators</TableCell>
                     <TableCell className={ classes.tableHeader }>Content</TableCell>
                     <TableCell className={ classes.tableHeader }>Updated At</TableCell>
                     <TableCell className={ classes.tableHeader }>Edit</TableCell>
@@ -183,6 +185,8 @@ class DocumentsManager extends Component {
                   {orderBy(documents, ['updatedAt', 'name'], ['desc', 'asc']).map(document => (
                     <TableRow key={ document._id } className={ classes.tableRow } component={ Link } to={ `/documents/${ document._id }/` }>
                       <TableCell component="th" scope="row">{ document.name }</TableCell>
+                      <TableCell component="th" scope="row">{ document.meetingId }</TableCell>
+                      <TableCell component="th" scope="row">{ document.annotators.join(", ") }</TableCell>
                       { /* Only show substring of content if it is to large */ }
                       <TableCell>
                         { document.content.length > MAX_LENGTH ? (

@@ -3,7 +3,7 @@ ne[status~="confirmed-at-type-level"], .confirmedAtTypeLevel {
 }
 
 ne[status~="disproved-at-type-level"], .disprovedAtTypeLevel {
-  background-color: #f32727;
+  background-color: #ffe0e0;
 }
 
 ne[status~="pending-at-token-level"], .pendingAtTokenLevel {

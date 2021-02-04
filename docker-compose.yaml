@@ -21,7 +21,7 @@ services:
      networks:
       elitr:
      volumes: 
-      - C:\Daten\test:/usr/src/app/projectFiles
+      - /home/james/elitr/annotationFiles:/usr/src/app/externalFiles
      deploy:
       replicas: 1
       update_config:

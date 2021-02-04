@@ -3,7 +3,6 @@ version: '3.8'
 services:
    elitr-mongo:
     image: mongo:latest
-    container_name: elitr_mongo
     ports: 
       - "27017:27017"
     restart: always
@@ -13,7 +12,6 @@ services:
       - /C/Daten/elitr/mongo:/data/db
    elitr-web:
      image: ghcr.io/jimmylevell/annotator:latest
-     container_name: elitr_web
      ports:
       - "10000:10000"
      depends_on:
@@ -34,4 +32,3 @@ services:
 
 networks:
   elitr:
-   name: elitr

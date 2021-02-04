@@ -24,7 +24,7 @@ services:
      depends_on:
       - elitr-mongo
      restart: always
-     env_file: .env
+     env_file: /home/james/elitr/annotator/.env
      networks:
       elitr:
      volumes: 

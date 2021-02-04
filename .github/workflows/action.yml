@@ -42,4 +42,4 @@ jobs:
           ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
           deployment_mode: docker-swarm
           pull_images_first: 'true'
-          args: elitr
+          args: --env-file /home/james/elitr/annotator/.env elitr

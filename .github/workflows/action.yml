@@ -45,7 +45,7 @@ jobs:
        name: Deploy to Docker swarm
        uses: wshihadeh/docker-deployment-action@v2
        with:
-          remote_docker_host: docker@levell.ch
+          remote_docker_host: docker@5.9.138.216
           ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
           ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
           deployment_mode: docker-swarm

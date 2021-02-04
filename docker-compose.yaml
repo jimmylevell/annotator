@@ -10,6 +10,13 @@ services:
       elitr:
     volumes: 
       - /C/Daten/elitr/mongo:/data/db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
    elitr-web:
      image: ghcr.io/jimmylevell/annotator:latest
      ports:
@@ -23,7 +30,7 @@ services:
      volumes: 
       - /home/james/elitr/annotationFiles:/usr/src/app/externalFiles
      deploy:
-      replicas: 1
+      replicas: 3
       update_config:
         parallelism: 1
         delay: 10s

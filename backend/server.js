@@ -26,16 +26,23 @@ mongoose.connect(dbConfig.db, {
 let publicFolder = path.resolve(__dirname, '..')
 app.use(express.static(path.join(publicFolder, 'build')));
 
-// increase parsing capacity
+// increase parsing and upload capacity
 app.use(bodyParser.urlencoded({
     limit: "50mb",
     extended: true
-  }));
-app.use(bodyParser.json({limit: "50mb", extended: true}));
+}));
+app.use(bodyParser.json({
+    limit: "50mb", 
+    extended: true
+}));
 
+// enable cors
 app.use(cors());
+
+// publish API
 app.use(BASE_DIR + 'api', api)
 
+// start app
 const server = app.listen(port, () => {
     console.log('Connected to port ' + port)
 })

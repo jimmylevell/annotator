@@ -17,6 +17,7 @@ import InfoSnackbar from '../components/infoSnackbar';
 
 const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL + REACT_APP_BASE_DIR
+const AUTOSAVE_INTERVALL_SEC = 10
 const styles = theme => ({
   contentInput: {
     width: "90%",
@@ -53,7 +54,7 @@ class DocumentEditor extends Component {
       if(that.state.changed) {
         that.handleSaveDocument()
       }
-    }, 10000)
+    }, AUTOSAVE_INTERVALL_SEC * 1000)
   }
 
   componentDidMount = () => {
@@ -113,7 +114,7 @@ class DocumentEditor extends Component {
     let document = this.state.document
     document.content = evt.target.value
     
-    // save changed document and set changed flag
+    // update changed document in state and set changed flag, so after intervall document is automatically saved
     this.setState({
       changed: true,
       document: document
@@ -124,7 +125,7 @@ class DocumentEditor extends Component {
     await this.fetch('put', '/documents/' + this.state.documentId, this.state.document)
 
     if(!this.state.error) {
-      // save changed document and set changed flag false
+      // save changed document to backend and set changed flag false
       this.setState({
         changed: false,
         success: "Document saved successfully"
@@ -133,12 +134,14 @@ class DocumentEditor extends Component {
   }
 
   async handleUpdateAnnotations() {
-    await this.fetch('get', '/documents/' + this.state.documentId + "/reannotate")
+    if (window.confirm(`Are you sure you reexecute the annotations for the given document? All previous created annotations and anonymization labels will be cleared for this document.`)) {
+      await this.fetch('get', '/documents/' + this.state.documentId + "/reannotate")
 
-    if(!this.state.error) {
-      this.setState({
-        success: "Document reannotation completed successfully"
-      })
+      if(!this.state.error) {
+        this.setState({
+          success: "Document reannotation completed successfully"
+        })
+      }
     }
   }
 
@@ -154,6 +157,7 @@ class DocumentEditor extends Component {
           <div>
             <Typography variant="h5"> { this.state.document.name } </Typography>
 
+            { /* action bar */ }
             <Button 
               size="small" 
               color="primary" 
@@ -181,6 +185,7 @@ class DocumentEditor extends Component {
               <RefreshIcon/>Update annotations
             </Button>
 
+            { /* content view */ }
             <TextField
               type="text"
               value={ this.state.document.content }
@@ -195,7 +200,7 @@ class DocumentEditor extends Component {
         ) : (
           // no document could be found
           !this.state.loading && (
-            <Typography variant="subtitle1">No document with given ID could be found</Typography>
+            <Typography variant="subtitle1">No document with given ID could be found, please check provided id</Typography>
           )
         )}
 

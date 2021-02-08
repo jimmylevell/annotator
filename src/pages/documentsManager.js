@@ -23,7 +23,7 @@ import LoadingBar from '../components/loadingBar';
 import InfoSnackbar from '../components/infoSnackbar';
 import ErrorSnackbar from '../components/errorSnackbar';
 
-const MAX_LENGTH = 100
+const MAX_LENGTH_OF_CONTENT_PREVIEW = 100
 const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const styles = theme => ({
   documentsView: {
@@ -50,10 +50,10 @@ class DocumentsManager extends Component {
     super();
 
     this.state = {
-      loading: true,
       query: "",
       documents: "",
 
+      loading: true,
       success: null,
       error: null,
     };
@@ -142,6 +142,7 @@ class DocumentsManager extends Component {
   render() {
     const { classes } = this.props;
 
+    // providing filtering of documents using query
     let that = this
     let documents = filter(this.state.documents, function(obj) {
       return obj.name.toUpperCase().includes(that.state.query.toUpperCase());
@@ -149,6 +150,7 @@ class DocumentsManager extends Component {
     
     return (
       <Fragment>
+        { /* query input */ }
         <TextField
           type="text"
           key="inputQuery"
@@ -189,9 +191,9 @@ class DocumentsManager extends Component {
                       <TableCell component="th" scope="row">{ document.annotators.join(", ") }</TableCell>
                       { /* Only show substring of content if it is to large */ }
                       <TableCell>
-                        { document.content.length > MAX_LENGTH ? (
+                        { document.content.length > MAX_LENGTH_OF_CONTENT_PREVIEW ? (
                           <div>
-                              {`${ document.content.substring(0, MAX_LENGTH) }...` }
+                              {`${ document.content.substring(0, MAX_LENGTH_OF_CONTENT_PREVIEW) }...` }
                           </div>
                           ) : (
                           <div>
@@ -225,7 +227,7 @@ class DocumentsManager extends Component {
         ) : (
           // no documents available
           !this.state.loading && (
-            <Typography variant="subtitle1">So far no documents have been uploaded</Typography>
+            <Typography variant="subtitle1">So far no documents have been uploaded, start uploading your first document now</Typography>
           )
         )}
   

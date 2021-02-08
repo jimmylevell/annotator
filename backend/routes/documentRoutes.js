@@ -1,21 +1,28 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const multer  = require('multer');
-const router = express.Router();
 const stream = require('stream');
 const fs = require('fs');
 const neatCsv = require('neat-csv');
 const converter = require('json-2-csv');
+const cheerio = require('cheerio');
 
 let Document = require('../database/models/Document');
-// create multer virtual storage for temporal storage before document is saved on mongo db
+
+// create multer virtual storage for temporal storage before document is saved in mongo db
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// source of annoations 
+const router = express.Router();
+
+// source file for annoations 
 const ANNOTATION_FILE_EN = process.env.ANNOTATION_FILE_EN;
 const ANNOTATION_FILE_CZ = process.env.ANNOTATION_FILE_CZ;
+
+// default annotator which is inserted
 const ANNOTATOR = process.env.ANNOTATOR
+
+const NO_ANONYMIZATION_REPLACE_STRING = "NO_ANONYMIZATION_LABEL_FOR_THAT_PERSON"
 
 // function which escapes characters before being parsed through regex
 function escapeRegExp(string) {
@@ -32,6 +39,7 @@ function extractPeopleChars(document) {
     people = new Set(people)
 
     people.forEach(person =>{
+        // person object has symbol e.g (J) and a name which is filled in the frontend e.g James
         let personObject = { symbol: "", name: "" }
         personObject.symbol = person
 
@@ -42,20 +50,22 @@ function extractPeopleChars(document) {
 }
 
 // function which enriches a given document with the annoations
+// iterats through the source of annotations ans searches for them in a given document
+// found annotations are being replaced as <NE></NE> tag
 function addAnnotationsToDocument(document) {
     return new Promise(function(resolve, reject) {
         let annotatedContent = document.content
         let language = document.language
         let annoationFile = null
 
-        // select the correct annoation file
+        // select the correct annoation file based on language
         if(language === "English") {
             annoationFile = ANNOTATION_FILE_EN
         } else if(language === "Czech") {
             annoationFile = ANNOTATION_FILE_CZ
         } else {
             // document has no language, through error 
-            reject("document does not have language")
+            reject("document does not have language set therefore no annotation file can be selected")
         }
 
         fs.readFile(annoationFile, 'utf8' , async (err, data) => {
@@ -65,8 +75,16 @@ function addAnnotationsToDocument(document) {
                 reject(err)
             }
         
-            // iterate through the annotation and if maybe / yes replace it with a corresponding tag within the content 
-            // each annoation is given a unique key, but can occure multiple times within the document
+            // iterate through the annotation and replace matches with tag and corresponding tag status
+            // each annoation is given a unique key
+            // following status are allowed for a tag: 
+            //            confirmed-at-type-level - annotation found in annotation file as YES
+            //            disproved-at-type-level - annotation found in annotation file as NO
+            //            pending-at-token-level - annotation found in annotation file as MAYBE
+            //            confirmed-at-token-level - pending annotation has been defined in frontend
+            //            disproved-at-token-level - pending annotation has been defined in frontend
+            //            new - new annotation has been added in the frontend
+
             let id = 1
             let annotations = await neatCsv(data)
             annotations.forEach(annotation => {
@@ -106,6 +124,8 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
         name: req.file.originalname,
         meetingId: req.body.meetingId,
         language: req.body.language,
+        annotators: [],
+        mentionedPeople: [],
         content: content,
         annotated_content: ""
     });
@@ -114,7 +134,8 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
     addAnnotationsToDocument(document)
         .then(document => {
             document.mentionedPeople = extractPeopleChars(document)
-            document.save().then(result => {
+            document.save()
+            .then(result => {
                 res.status(201).json({
                     message: "Document uploaded successfully!",
                     documentCreated: {
@@ -134,7 +155,8 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
 
 // get all documents
 router.get("/documents", (req, res, next) => {
-    Document.find().then(data => {
+    Document.find()
+    .then(data => {
         res.status(200).json({
             message: "Document list retrieved successfully!",
             documents: data
@@ -145,7 +167,9 @@ router.get("/documents", (req, res, next) => {
 // get specific document by id
 router.get("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
-    Document.findOne({ '_id': documentId}).then(data => {
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
         res.status(200).json({
             message: "Document retrieved successfully!",
             documents: data
@@ -156,7 +180,9 @@ router.get("/documents/:id", (req, res, next) => {
 // provide download option of the original content as .txt of a given document
 router.get("/documents/:id/orgDoc/download", (req, res, next) => {
     let documentId = req.params.id
-    Document.findOne({ '_id': documentId}).then(data => {
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
         // output document content as .txt
         let filename = data.name
         var fileContents = Buffer.from(data.content, "utf8");
@@ -174,7 +200,9 @@ router.get("/documents/:id/orgDoc/download", (req, res, next) => {
 // provide download option of the mentioned people as .csv of a given document
 router.get("/documents/:id/mentionedPeople/download", (req, res, next) => {
     let documentId = req.params.id
-    Document.findOne({ '_id': documentId}).then(data => {
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
         // output document content as .csv
         let filename = data.name + "_mentionedPeople.csv"
 
@@ -198,7 +226,9 @@ router.get("/documents/:id/mentionedPeople/download", (req, res, next) => {
 // provide download option of the annotated content as .xml of a given document
 router.get("/documents/:id/annotatedDoc/download", (req, res, next) => {
     let documentId = req.params.id
-    Document.findOne({ '_id': documentId}).then(data => {
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
         // output document content as xml
         let filename = data.name + "_annotated.xml"
         var fileContents = Buffer.from(data.annotated_content, "utf8");
@@ -213,10 +243,59 @@ router.get("/documents/:id/annotatedDoc/download", (req, res, next) => {
     });
 });
 
+// provide download option of the anonymized content as .txt of a given document
+router.get("/documents/:id/anonymizedDocument/download", (req, res, next) => {
+    let documentId = req.params.id
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
+        // replace <NE></NE> tags with anonymized label if tag status is confirmed
+        // otherwise replace it with text value
+        // if status is confirmed and no anonymization label has been provided, black out text
+        let content = data.annotated_content
+        const $ = cheerio.load(content, null, false);
+
+        // iterate through each <NE></NE>
+        $("NE").each(function(i, elm) {
+            let status = $(this).attr("status")
+
+            // if namedtag has to be anonymized, do so
+            if(status === "confirmed-at-token-level" || 
+                status === "confirmed-at-type-level" ) {
+                    let anonymizationLabel = $(this).attr("anonymizedlabel")
+                    if(!anonymizationLabel) {
+                        anonymizationLabel = NO_ANONYMIZATION_REPLACE_STRING
+                    }
+
+                    $(this).replaceWith(anonymizationLabel)
+            } else {
+                // otherwise just replace it with the text value
+                $(this).replaceWith($(this).text())
+            }
+        })
+        
+        content = $.html()
+
+        // response with .txt output
+        let filename = data.name + "_anonymized.txt"
+        var fileContents = Buffer.from(content, "utf8");
+
+        var readStream = new stream.PassThrough();
+        readStream.end(fileContents);
+      
+        res.set('Content-disposition', 'attachment; filename=' + filename);
+        res.set('Content-Type', 'text/plain');
+      
+        readStream.pipe(res);
+    });
+});
+
 // get method - trigger update of the annoations
 router.get('/documents/:id/reannotate', (req, res, next) => {
     let documentId = req.params.id
-    Document.findOne({ '_id': documentId}).then(data => {
+
+    Document.findOne({ '_id': documentId})
+    .then(data => {
         // execute annoation of document
         addAnnotationsToDocument(data)
             .then(document => {
@@ -244,7 +323,8 @@ router.get('/documents/:id/reannotate', (req, res, next) => {
 router.put("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
     
-    Document.findOneAndUpdate({ '_id': documentId}, req.body).then(data => {
+    Document.findOneAndUpdate({ '_id': documentId}, req.body)
+    .then(data => {
         res.status(200).json({
             message: "Document updated successfully!",
             documents: data
@@ -255,7 +335,9 @@ router.put("/documents/:id", (req, res, next) => {
 // delete document based on id
 router.delete("/documents/:id", (req, res, next) => {
     let documentId = req.params.id
-    Document.deleteOne({ '_id': documentId}).then(data => {
+
+    Document.deleteOne({ '_id': documentId})
+    .then(data => {
         res.status(200).json({
             message: "Document deleted retrieved successfully!",
             documents: data

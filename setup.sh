@@ -21,3 +21,11 @@ docker run \
 # commands for managing docker container
 docker rm -f elitr-mongo
 docker exec -it elitr-mongo /bin/bash
+
+# for deployig the service within a docker swarm
+docker stack deploy --compose-file docker-compose.yml elitr
+docker stack services elitr
+
+# or by using the compose file
+docker-compose up
+docker-compose down

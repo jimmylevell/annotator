@@ -12,17 +12,23 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import DescriptionIcon from '@material-ui/icons/Description';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
 import { compose } from 'recompose';
 
 import LoadingBar from '../components/loadingBar';
 import ErrorSnackbar from '../components/errorSnackbar';
 import InfoSnackbar from '../components/infoSnackbar';
+import AnonymizationEditor from '../components/anonymizationEditor'
 
 import './documentAnnotator.css'
 
 const REACT_APP_BASE_DIR = process.env.REACT_APP_BASE_DIR || '/'
 const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL + REACT_APP_BASE_DIR
+const AUTOSAVE_INTERVALL_SEC = 10
+const HIGHTLIGHT_TIMEOUT = 3000
+const VIEW_CORRECTION = -100
 const styles = theme => ({
   annotatorView: {
     width: "85%",
@@ -44,6 +50,18 @@ const styles = theme => ({
   }
 });
 
+// unwrap element of parent, make it a strong and independent offspring
+function unwrap(wrapper) {
+  var docFrag = document.createDocumentFragment();
+  while (wrapper.firstChild) {
+      var child = wrapper.removeChild(wrapper.firstChild);
+      docFrag.appendChild(child);
+  }
+
+  // replace wrapper with document fragment
+  wrapper.parentNode.replaceChild(docFrag, wrapper);
+}
+
 class DocumentAnnotator extends Component {
   constructor() {
     super();
@@ -55,6 +73,7 @@ class DocumentAnnotator extends Component {
       selection: null,        // saved selection of marked content, used for adding new name tags
       annotator: "",          // annotator name
 
+      showEditor: false,       // flag to control the display of the editor
       changed: false,         // flag for indication of changes of the document
       success: null,          // flag to trigger success info
       loading: true,          // flag to trigger loading
@@ -75,7 +94,7 @@ class DocumentAnnotator extends Component {
       if(that.state.changed) {
         that.handleSaveDocument()
       }
-    }, 10000)
+    }, AUTOSAVE_INTERVALL_SEC * 1000)
   }  
 
   componentDidMount = () => {
@@ -163,18 +182,53 @@ class DocumentAnnotator extends Component {
     if(tagName === "NE") {
       if(data.action === "yes") {
         tagStatus = "confirmed-at-token-level"
+
+        // set status and annotator of new named tag
+        tag.setAttribute("status", tagStatus)
+        tag.setAttribute("annotator", this.state.annotator)
+
       } else if (data.action === "no") {
         tagStatus = "disproved-at-token-level"
+
+        // set status and annotator of new named tag
+        tag.setAttribute("status", tagStatus)
+        tag.setAttribute("annotator", this.state.annotator)
+
       } else if (data.action === "delete") {
         if(data.target.getAttribute("status") === "new") {
           // only allow delete action if it is a "new"ly added tag
           data.target.replaceWith(data.target.innerText)
         }
-      }
+      } else if (data.action === "yes_all") {
+        tagStatus = "confirmed-at-token-level"
 
-      // set status and annotator of new named tag
-      tag.setAttribute("status", tagStatus)
-      tag.setAttribute("annotator", this.state.annotator)
+        let view = this.annotatorView.current.innerHTML
+        let annotator = this.state.annotator
+        let id = document.getElementsByTagName("NE").length
+
+        // search for all similar elements in document and insert new <NE></NE>
+        let regEx = new RegExp(data.target.innerText, 'g')
+        this.annotatorView.current.innerHTML = view.replace(regEx, function(match) {
+          let tag = "<NE status='confirmed-at-token-level' id='" + id + "' annotator='" + annotator + "'>" + match + "</NE>"
+          id++ 
+
+          return tag
+        })
+
+        // becaues the first element already has a <NE status="NEW"></NE> tag and throgh the replace it is now double wrapped, we need to unrwap it
+        let uncessary_wrapped_elements = Array.from(document.getElementsByTagName("NE"))
+        uncessary_wrapped_elements = uncessary_wrapped_elements.filter(element => element.getAttribute("status") === "new")
+        uncessary_wrapped_elements.forEach(element => {
+          if(element.children.length > 0) {
+            let children = Array.from(element.children)
+            children.forEach(child => {
+              unwrap(child)
+            })
+
+            element.setAttribute("status", tagStatus)
+          }
+        })
+      }
 
       // updated view and then the state
       doc.annotated_content = this.annotatorView.current.innerHTML
@@ -192,8 +246,6 @@ class DocumentAnnotator extends Component {
 
   // to iterate through the annotations
   handleNextAnnotation = (count) => {
-    const HIGHTLIGHT_TIMEOUT = 3000
-    const VIEW_CORRECTION = -100
     let counter = this.state.counter
 
     // check if html document is present
@@ -236,9 +288,9 @@ class DocumentAnnotator extends Component {
           // selection cannot be zero
           if(range.startOffset !== range.endOffset) {
             let nameTagElement = document.createElement("NE");
+            nameTagElement.setAttribute("id", document.getElementsByTagName("NE").length)
             nameTagElement.setAttribute("status", "new")
             nameTagElement.setAttribute("annotator", this.state.annotator)
-            nameTagElement.setAttribute("id", document.getElementsByTagName("NE").length)
             
             // try if we can add the new named tag, if we cannot it is most likely that it overlaps existing named tags
             try {
@@ -280,6 +332,32 @@ class DocumentAnnotator extends Component {
     })
   }
 
+  // function which takes the added anonymization labels and adds them to the <NE anonymizedLabel=""></NE>
+  handleAnonymizationChange = (namedTags) => {
+    let doc = this.state.document 
+
+    namedTags.forEach(element => {
+      if(element.anonymizedLabel) {
+        let node = document.getElementById(element.id)
+        node.setAttribute("anonymizedLabel", element.anonymizedLabel)
+      }
+    })
+
+    doc.annotated_content = this.annotatorView.current.innerHTML
+      
+    this.setState({
+      changed: true,
+      document: doc,
+      showEditor: !this.state.showEditor
+    })
+  }
+
+  toogleShowEditor = () => {
+    this.setState({
+      showEditor: !this.state.showEditor
+    })
+  }
+
   render() {
     const { classes } = this.props
 
@@ -297,6 +375,22 @@ class DocumentAnnotator extends Component {
               color="primary" 
               onClick={ this.handleSaveDocument }>
                 <SaveAltIcon/>Save
+            </Button>
+
+            <Button 
+              size="small" 
+              color="primary" 
+              onClick={ this.toogleShowEditor }>
+                <VpnKeyIcon/>Edit Anonymizations
+            </Button>
+
+            <Button 
+              href={ `${ REACT_APP_BACKEND_URL }api/documents/${ this.state.documentId }/anonymizedDocument/download` }
+              size="small" 
+              color="primary"
+              className={ classes.buttons }
+              >
+                <AssignmentIndIcon/>Download anonymized file
             </Button>
 
             <Button 
@@ -380,7 +474,15 @@ class DocumentAnnotator extends Component {
                   <Typography className="newAnnotations">New annotations</Typography>
                 </Box>
             </Box>
-          </div>        
+            
+            { /* include editor */ }
+            <AnonymizationEditor 
+              handleChange={ this.handleAnonymizationChange } 
+              handleClose={ this.toogleShowEditor }
+              showModal={ this.state.showEditor }
+              namedTags={ document.getElementsByTagName("NE") }
+            />
+          </div>  
         ) : (
           // no document could be found
           !this.state.loading && (
@@ -416,6 +518,13 @@ class DocumentAnnotator extends Component {
             onClick={ this.handleClick }
           >
             yes
+          </MenuItem>
+
+          <MenuItem
+            data={{ action: 'yes_all' }}
+            onClick={ this.handleClick }
+          >
+            yes replace all
           </MenuItem>
 
           <MenuItem

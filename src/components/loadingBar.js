@@ -12,7 +12,8 @@ const styles = theme => ({
         top: theme.spacing(10),
         fontSize: 100,
         marginTop: theme.spacing(10),
-        marginLeft: '50%'
+        marginLeft: '50%',
+        zIndex: 100000
     }
 });
 

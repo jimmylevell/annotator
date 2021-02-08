@@ -25,7 +25,8 @@ const styles = theme => ({
   },
   textInput: {
     marginTop: theme.spacing(4),
-    display: "block"
+    display: "block",
+    width: "30%"
   }
 });
 const languages = ["English", "Czech"]      // language definition for dropdown
@@ -38,11 +39,12 @@ class FileUploadComponent extends Component {
     this.state = {      
         document: '',
         language: "English",
-        inputFileKey: Date.now(),         // after the successfull upload of a document we have to reiinitialize the input field
+        inputFileKey: Date.now(),        // after the successfull upload of a document we have to reiinitialize the input field
+        meetingId: '',
 
         loading: true,                   // flag for displaying loading bar
         success: null,                   // flag for displaying success messages
-        error: null,                   // flag for displaying error messages
+        error: null,                     // flag for displaying error messages
       };
 
       this.onFileChange = this.onFileChange.bind(this);
@@ -158,41 +160,42 @@ class FileUploadComponent extends Component {
             >
               Choose Files
             </Button>
-        </label>
+          </label>
 
-        <TextField
-          required
-          key="inputMeetingId"
-          name="meetingId"
-          label="Meeting id"
-          type="text"
-          value={ this.state.meetingId }
-          onChange={ this.handleChange }
-          className={ classes.textInput }
-        />
+          <TextField
+            required
+            key="inputMeetingId"
+            name="meetingId"
+            label="Meeting id"
+            type="text"
+            fullWidth
+            value={ this.state.meetingId }
+            onChange={ this.handleChange }
+            className={ classes.textInput }
+          />
 
-        <InputLabel id="labelInputLanguage" className={ classes.inputLabel }>Language</InputLabel>
-        <Select
-          labelId="labelInputLanguage"
-          id="inputLanguage"
-          value={ this.state.language }
-          onChange={ this.handleChange }
-          required
-        >
-          {
-            languages.map((language, i) => (
-              <MenuItem key={ i } value={ language }><em>{ language }</em></MenuItem>
-            ))
-          }
-        </Select>
+          <InputLabel id="labelInputLanguage" className={ classes.inputLabel }>Language</InputLabel>
+          <Select
+            labelId="labelInputLanguage"
+            id="inputLanguage"
+            value={ this.state.language }
+            onChange={ this.handleChange }
+            required
+          >
+            {
+              languages.map((language, i) => (
+                <MenuItem key={ i } value={ language }><em>{ language }</em></MenuItem>
+              ))
+            }
+          </Select>
 
-        <div className="file-name">
-          { /* show upload button and filename only if file has been selected*/}
-          { this.state.document && this.state.document.name.length > 0 && (
-            <Typography className={ classes.inputLabel }>File: { this.state.document.name }</Typography>
-          )}
-        </div>
-          
+          <div className="file-name">
+            { /* show upload button and filename only if file has been selected*/}
+            { this.state.document && this.state.document.name.length > 0 && (
+              <Typography className={ classes.inputLabel }>Selected file: { this.state.document.name }</Typography>
+            )}
+          </div>
+            
           <Button
             color="primary" 
             variant="outlined"

@@ -111,11 +111,19 @@ class AnonymizationEditor extends Component {
     let after = ""
 
     if(element.previousSibling) {
-      before = element.previousSibling.textContent + " " + element.previousElementSibling.innerText
+      before = element.previousSibling.textContent + " "
+    }
+
+    if(element.previousElementSibling) {
+      before = before + element.previousElementSibling.innerText
     }
 
     if(element.nextElementSibling) {
-      after = element.nextSibling.textContent + " " + element.nextElementSibling.innerText
+      after = element.nextSibling.textContent + " "
+    }
+
+    if(element.nextElementSibling) {
+      after = after + element.nextElementSibling.innerText
     }
 
     // limit display to MAX_CHARS_FOR_SURROUNDING

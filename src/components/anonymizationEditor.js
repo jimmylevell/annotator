@@ -52,7 +52,9 @@ const styles = theme => ({
 });
 const MAX_CHARS_FOR_SURROUNDING = 30    // max characaters for surrounding elements
 const PRESET_ANONYMIZED_LABELS = [
-  { title:"pers001" }
+  { title:"per001" },
+  { title:"org001" },
+  { title:"prj001" }
 ]
 
 class AnonymizationEditor extends Component {
@@ -104,15 +106,23 @@ class AnonymizationEditor extends Component {
 
   // function which extracts content before and after given DOM element, surrounding is limited by MAX_CHARS_FOR_SURROUNDING
   getSurroundingContent(element) {
-    let surrounding = element.innerText
-    let before = element.previousSibling.textContent + " " + element.previousElementSibling.innerText
-    let after = element.nextSibling.textContent + " " + element.nextElementSibling.innerText
+    let annotationElement = element.innerText
+    let before = ""
+    let after = ""
+
+    if(element.previousSibling) {
+      before = element.previousSibling.textContent + " " + element.previousElementSibling.innerText
+    }
+
+    if(element.nextElementSibling) {
+      after = element.nextSibling.textContent + " " + element.nextElementSibling.innerText
+    }
 
     // limit display to MAX_CHARS_FOR_SURROUNDING
     before = before.substring(before.length - MAX_CHARS_FOR_SURROUNDING, before.length)
     after = after.substring(0, MAX_CHARS_FOR_SURROUNDING)
 
-    return before + " <b>" + surrounding + "</b> " + after
+    return before + " <b>" + annotationElement + "</b> " + after
   }
   
   // check if a typed label exists in the current state
@@ -172,7 +182,11 @@ class AnonymizationEditor extends Component {
           showModal: !this.state.showModal
         }, parentHandler)
       }
-    }    
+    } else {
+      this.setState({
+        showModal: !this.state.showModal
+      }, parentHandler)
+    }
   }
 
   onDropDownChange(event, newValue, key) {

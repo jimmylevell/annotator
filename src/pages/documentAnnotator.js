@@ -294,21 +294,24 @@ class DocumentAnnotator extends Component {
             
             // try if we can add the new named tag, if we cannot it is most likely that it overlaps existing named tags
             try {
-              range.surroundContents(nameTagElement)
+              nameTagElement.innerText = range.toString()
+              range.deleteContents()              
+              range.insertNode(nameTagElement)
               selection.removeAllRanges()
               selection.addRange(range)
 
               // as soon as selection has been added update state
-              let document = this.state.document
-              document.annotated_content = this.annotatorView.current.innerHTML
-              this.annotatorView.current.innerHTML = document.annotated_content
+              let doc = this.state.document
+              doc.annotated_content = this.annotatorView.current.innerHTML
+              this.annotatorView.current.innerHTML = doc.annotated_content
 
               this.setState({
                 changed: true,
-                document: document
+                document: doc
               })
 
-            } catch {
+            } catch(e) {
+              console.log(e)
               this.setState({
                 error: { message: "Cannot set a new annotation overlapping an existing annotation."}
               })

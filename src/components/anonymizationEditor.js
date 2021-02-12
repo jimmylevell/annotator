@@ -15,6 +15,7 @@ import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import ClearIcon from '@material-ui/icons/Clear';
+import FindReplaceIcon from '@material-ui/icons/FindReplace';
 
 import LoadingBar from './loadingBar'
 import ErrorSnackbar from './errorSnackbar'
@@ -75,6 +76,7 @@ class AnonymizationEditor extends Component {
 
     this.handleChange = this.handleChange.bind(this)
     this.handleClose = this.handleClose.bind(this)
+    this.handleReplaceAll = this.handleReplaceAll.bind(this)
   }
 
   componentDidUpdate() {
@@ -84,7 +86,12 @@ class AnonymizationEditor extends Component {
       // extract <NE></NE> which have status confirmed, so therefore need to be anonymized
       passed_namedTags = passed_namedTags.filter(element => element.getAttribute("status") === "confirmed-at-token-level" ||
                                               element.getAttribute("status") === "confirmed-at-type-level")
-  
+
+      // reset anonymization labels 
+      this.setState({
+        anonymizedLabels: PRESET_ANONYMIZED_LABELS
+      })
+
       let namedTags = []
       passed_namedTags.forEach(element => {
         namedTags.push({
@@ -93,6 +100,10 @@ class AnonymizationEditor extends Component {
           surrounding: this.getSurroundingContent(element),
           anonymizedLabel: element.getAttribute("anonymizedLabel")
         })
+
+        if(element.getAttribute("anonymizedLabel")) {
+          this.addLabelIfNotExisting({inputValue: element.getAttribute("anonymizedLabel")})
+        }
       })
 
       this.setState({ 
@@ -251,6 +262,22 @@ class AnonymizationEditor extends Component {
     return filtered;
   }
 
+  handleReplaceAll(evt, key) {
+    let namedTags = this.state.namedTags
+    let annotation = namedTags[key].annotation
+    let anonymizedLabel = namedTags[key].anonymizedLabel
+
+    namedTags.forEach(namedTag => {
+      if(namedTag.annotation === annotation && anonymizedLabel) {
+        namedTag.anonymizedLabel = anonymizedLabel
+      }
+    })
+
+    this.setState({
+      namedTags: namedTags
+    })
+  }
+
   render() {
     const { classes } = this.props
 
@@ -274,8 +301,10 @@ class AnonymizationEditor extends Component {
                       <Grid item xs={ 4 }>
                         <Typography>Context</Typography>
                       </Grid>
-                      <Grid item xs={ 6 }>
+                      <Grid item xs={ 4 }>
                         <Typography>Anonymized Label</Typography>
+                      </Grid>
+                      <Grid item xs={ 2 }>
                       </Grid>
                   </Grid>
 
@@ -288,7 +317,7 @@ class AnonymizationEditor extends Component {
                         <Grid item xs={ 4 }>
                           <Typography dangerouslySetInnerHTML={ {__html: this.state.namedTags[key].surrounding} }></Typography>
                         </Grid>
-                        <Grid item xs={ 6 }>                  
+                        <Grid item xs={ 4 }>                  
                           <Autocomplete
                             value={ this.state.namedTags[key].anonymizedLabel }
                             onChange={(event, newValue) => this.onDropDownChange(event, newValue, key)}
@@ -317,6 +346,14 @@ class AnonymizationEditor extends Component {
                               <TextField {...params} label="Anonymized Label" variant="outlined" key={ `anonyimizationDropdownElement-${key}` } />
                             )}
                             />
+                        </Grid>
+                        <Grid item xs={ 2 }>
+                          <Button 
+                            size="small" 
+                            onClick={ (evt) => this.handleReplaceAll(evt, key) }
+                          >
+                              <FindReplaceIcon/>Replace all
+                          </Button>
                         </Grid>
                       </Grid>
                     )}

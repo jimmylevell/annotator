@@ -62,7 +62,7 @@ class AppHeader extends Component {
   }
 
   componentDidMount() {
-    if(this.state.person === "") {
+    if(this.state.person === "" || !this.state.preson || this.state.person === "null") {
       this.handleNameChange()
     }
   }

@@ -29,10 +29,11 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-// function to detect any people symbols (e.g (J) and extract them)
+// function to detect any people symbols (e.g (J), (Jimmy) and extract them)
+// symbols need to be at beginning of line
 function extractPeopleChars(document) {
     let personResult = []
-    const regex = /(\([A-z]\))/gm
+    const regex = /^(\([A-z]+\))/gm
     let people = document.content.match(regex)
 
     // make results unique

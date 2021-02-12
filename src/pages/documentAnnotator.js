@@ -217,7 +217,7 @@ class DocumentAnnotator extends Component {
 
         // becaues the first element already has a <NE status="NEW"></NE> tag and throgh the replace it is now double wrapped, we need to unrwap it
         let uncessary_wrapped_elements = Array.from(document.getElementsByTagName("NE"))
-        uncessary_wrapped_elements = uncessary_wrapped_elements.filter(element => element.getAttribute("status") === "new")
+        uncessary_wrapped_elements = uncessary_wrapped_elements.filter(element => element.children.length > 0)
         uncessary_wrapped_elements.forEach(element => {
           if(element.children.length > 0) {
             let children = Array.from(element.children)

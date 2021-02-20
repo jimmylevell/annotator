@@ -66,7 +66,7 @@ class AnonymizationEditor extends Component {
       namedTags: [
         { id: 0, annotation: '', surrounding: '', anonymizedLabel: ''}
       ],
-      anonymizedLabels: PRESET_ANONYMIZED_LABELS,
+      anonymizedLabels: JSON.parse(JSON.stringify(PRESET_ANONYMIZED_LABELS)), // create a deep copy of the object
 
       changed: false,
       showModal: false,
@@ -86,11 +86,6 @@ class AnonymizationEditor extends Component {
       // extract <NE></NE> which have status confirmed, so therefore need to be anonymized
       passed_namedTags = passed_namedTags.filter(element => element.getAttribute("status") === "confirmed-at-token-level" ||
                                               element.getAttribute("status") === "confirmed-at-type-level")
-
-      // reset anonymization labels 
-      this.setState({
-        anonymizedLabels: PRESET_ANONYMIZED_LABELS
-      })
 
       let namedTags = []
       passed_namedTags.forEach(element => {

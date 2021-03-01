@@ -22,7 +22,7 @@ const ANNOTATION_FILE_CZ = process.env.ANNOTATION_FILE_CZ;
 // default annotator which is inserted
 const ANNOTATOR = process.env.ANNOTATOR
 
-const NO_ANONYMIZATION_REPLACE_STRING = "NO_ANONYMIZATION_LABEL_FOR_THAT_PERSON"
+const NO_ANONYMIZATION_REPLACE_STRING = "NO_ANONYMIZATION_LABEL_FOR_THAT_ENTITY"
 
 // function which escapes characters before being parsed through regex
 function escapeRegExp(string) {

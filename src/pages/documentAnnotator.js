@@ -199,8 +199,11 @@ class DocumentAnnotator extends Component {
           // only allow delete action if it is a "new"ly added tag
           data.target.replaceWith(data.target.innerText)
         }
-      } else if (data.action === "yes_all") {
-        tagStatus = "confirmed-at-token-level"
+      } else if (data.action === "yes_all" || data.action === "no_all") {
+        let tagStatus = "disproved-at-token-level"
+        if(data.action === "yes_all") {
+          tagStatus = "confirmed-at-token-level"
+        }
 
         let view = this.annotatorView.current.innerHTML
         let annotator = this.state.annotator
@@ -209,7 +212,7 @@ class DocumentAnnotator extends Component {
         // search for all similar elements in document and insert new <NE></NE>
         let regEx = new RegExp(data.target.innerText, 'g')
         this.annotatorView.current.innerHTML = view.replace(regEx, function(match) {
-          let tag = "<NE status='confirmed-at-token-level' id='" + id + "' annotator='" + annotator + "'>" + match + "</NE>"
+          let tag = "<NE status='" + tagStatus + "' id='" + id + "' annotator='" + annotator + "'>" + match + "</NE>"
           id++ 
 
           return tag
@@ -535,6 +538,13 @@ class DocumentAnnotator extends Component {
             onClick={ this.handleClick }
           >
             no
+          </MenuItem>
+
+          <MenuItem
+            data={{ action: 'no_all' }}
+            onClick={ this.handleClick }
+          >
+            no replace all
           </MenuItem>
 
           <MenuItem

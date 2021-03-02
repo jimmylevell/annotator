@@ -102,7 +102,7 @@ function addAnnotationsToDocument(document) {
                     tagAnnotator = "pending"
                 }
 
-                var regEx = new RegExp("\\b" + escapeRegExp(annotation.annotation) + "\\b", 'g');
+                var regEx = new RegExp("(?<=[\\s,.:;\"']|^)" + escapeRegExp(annotation.annotation) + "(?=[\\s,.:;\"']|$)", "g");
                 annotatedContent = annotatedContent.replace(regEx, function() {
                     let tag = "<NE id='" + id + "' status='" + tagStatus + "' annotator='" + tagAnnotator + "'>" + annotation.annotation + "</NE>"
                     id++

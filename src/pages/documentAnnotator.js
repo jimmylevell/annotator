@@ -289,7 +289,7 @@ class DocumentAnnotator extends Component {
           let range = selection.getRangeAt(0).cloneRange()
 
           // selection cannot be zero
-          if(range.startOffset !== range.endOffset) {
+          if(range.toString().trim() !== "" && range.startOffset !== range.endOffset) {
             let nameTagElement = document.createElement("NE");
             nameTagElement.setAttribute("id", document.getElementsByTagName("NE").length)
             nameTagElement.setAttribute("status", "new")

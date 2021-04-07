@@ -59,6 +59,10 @@ function addAnnotationsToDocument(document) {
         let language = document.language
         let annoationFile = null
 
+        // repair existing tags
+        let regexTags = new RegExp("<(.+?)>", "g")
+        annotatedContent = annotatedContent.replace(regexTags, "<$1></$1>")
+
         // select the correct annoation file based on language
         if(language === "English") {
             annoationFile = ANNOTATION_FILE_EN
@@ -130,10 +134,6 @@ router.post('/documents', upload.single("document"), (req, res, next) => {
         content: content,
         annotated_content: ""
     });
-
-    // repair existing tags
-    let regexTags = new RegExp("<(.+?)>", "g")
-    document.content = document.content.replace(regexTags, "<$1></$1>")
 
     // execute annoation of document
     addAnnotationsToDocument(document)

@@ -235,7 +235,8 @@ class AnonymizationEditor extends Component {
 
       // update value
       let namedTags = this.state.namedTags
-      namedTags[key].anonymizedLabel = newValue.title
+
+      namedTags[key].anonymizedLabel = newValue ? newValue.title : ""
       this.setState({
         namedTags: namedTags,
         changed: true

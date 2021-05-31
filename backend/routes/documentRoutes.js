@@ -59,6 +59,10 @@ function addAnnotationsToDocument(document) {
         let language = document.language
         let annoationFile = null
 
+        // repair existing tags
+        let regexTags = new RegExp("<(.+?)>", "g")
+        annotatedContent = annotatedContent.replace(regexTags, "<$1></$1>")
+
         // select the correct annoation file based on language
         if(language === "English") {
             annoationFile = ANNOTATION_FILE_EN
@@ -74,7 +78,7 @@ function addAnnotationsToDocument(document) {
                 // error whil reading file
                 console.error(err)
                 reject(err)
-            }
+            }          
         
             // iterate through the annotation and replace matches with tag and corresponding tag status
             // each annoation is given a unique key
@@ -102,8 +106,8 @@ function addAnnotationsToDocument(document) {
                     tagAnnotator = "pending"
                 }
 
-                var regEx = new RegExp("(?<=[\\s,.:;\"']|^)" + escapeRegExp(annotation.annotation) + "(?=[\\s,.:;\"']|$)", "g");
-                annotatedContent = annotatedContent.replace(regEx, function() {
+                var regExAnnotation = new RegExp("(?<=[\\s,.:;\"']|^)" + escapeRegExp(annotation.annotation) + "(?=[\\s,.:;\"']|$)", "g");
+                annotatedContent = annotatedContent.replace(regExAnnotation, function() {
                     let tag = "<NE id='" + id + "' status='" + tagStatus + "' annotator='" + tagAnnotator + "'>" + annotation.annotation + "</NE>"
                     id++
                     return tag

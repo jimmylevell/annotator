@@ -124,7 +124,8 @@ class FileUploadComponent extends Component {
 
       this.setState({
         document: null,
-        inputFileKey: Date.now()    // reset the input key so that the input field is regenerated (reset)
+        meetingId: "",
+        inputFileKey: Date.now()    // reset the input key so that the input field is regenerated (reset),
       })
 
       if(this.state.error === null) {
